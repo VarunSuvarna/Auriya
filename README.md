@@ -1,58 +1,127 @@
-# Auriya
+# AlgoKYC - Decentralized KYC with ZK Proof
 
-Auriya is an open-source, NFT-gated hi-fi music platform that merges blockchain transparency, AI-powered personalization, and true lossless audio streaming. By issuing membership NFTs, Auriya grants fans exclusive access to studio-quality FLAC/WAV/DSD, rare mixes, live sessions, and direct artist interaction. Smart contracts automate royalties, ensuring fair, instant payments to all contributors.
+A decentralized KYC (Know Your Customer) verification system built on Algorand blockchain with zero-knowledge proofs for enhanced privacy.
 
-# Project Overview
+![AlgoKYC](https://placeholder.svg?height=400&width=800&query=Decentralized+KYC+Verification+Platform+with+ZK+Proofs)
 
-- **Vision:** Democratize premium audio experiences and restore artist value.  
-- **Mission:** Deliver studio-master quality music, personalized sound, and transparent compensation in one cohesive ecosystem.  
-- **Core Technologies:**  
-  - Blockchain (Polygon + IPFS) for NFT access control, decentralized storage, and on-chain royalties  
-  - AI (TensorFlow.js & Web Audio API) for real-time audio enhancement and emotional context mapping  
-  - Web3 (React.js & Web3.js) for seamless wallet integration and community governance  
+## Overview
 
-## 🚀 Key Features
+AlgoKYC is a cutting-edge solution that combines the security of blockchain technology with the privacy of zero-knowledge proofs to create a decentralized KYC verification system. This platform allows users to verify their identity once and share their verification status with multiple third parties without revealing sensitive personal information.
 
-- **NFT Membership Tiers:** Unique ERC-721 tokens unlock basic to VIP access levels, each granting additional content and perks.  
-- **Lossless Streaming:** 24-bit/192 kHz audio formats preserve every nuance of original studio recordings.  
-- **AI-Driven Audio Optimization:** Automatic hardware profiling and dynamic EQ, spatialization, and dynamic range adjustments.  
-- **Emotional Context Playlists:** Mood and activity detection adapt playback to listener’s state.  
-- **Transparent Royalties:** Smart contracts distribute payments instantly to artists, producers, and contributors per stream.  
-- **Community Governance:** Token-weighted voting for new artist spotlights, feature proposals, and exclusive events.  
-- **Exclusive Content Vault:** Alternate mixes, stems, behind-the-scenes footage, and live session recordings for NFT holders.
+## Key Features
 
-## 🔧 Tech Stack
+- **Decentralized Identity Verification**: Verify your identity on the Algorand blockchain
+- **Zero-Knowledge Proofs**: Share verification status without revealing personal data
+- **Third-Party Verification History**: Track which services have accessed your KYC status
+- **Multiple Verification Levels**: Support for different KYC levels based on requirements
+- **Secure Wallet Integration**: Connect with popular Algorand wallets
+- **Dark/Light Mode**: User-friendly interface with theme options
 
-- **Frontend:** React.js, Web3.js, Tailwind CSS  
-- **Smart Contracts:** Solidity on Polygon (ERC-721 membership, royalty split contracts)  
-- **Storage:** IPFS + Pinata for decentralized hosting of high-res audio  
-- **AI Modules:** TensorFlow.js models & Web Audio API for client-side processing  
-- **Backend:** Node.js, Express, MongoDB Atlas (metadata & community data)  
+## Technology Stack
 
-## 🎯 How It Works
+- **Frontend**: Next.js 14 with App Router
+- **UI Components**: shadcn/ui with Tailwind CSS
+- **Animations**: Framer Motion
+- **Blockchain**: Algorand
+- **Wallet Integration**: TXN Lab's use-wallet-react
+- **Zero-Knowledge Proofs**: ZK libraries (implementation details)
 
-1. **Mint or Import NFT:** User connects MetaMask and mints a membership NFT.  
-2. **Unlock Lossless Content:** Frontend verifies NFT ownership and enables high-fidelity streams.  
-3. **AI Audio Enhancement:** Client-side AI analyzes user gear and environment, applying real-time optimizations.  
-4. **Stream & Interact:** Users enjoy premium tracks, participate in voting, and message artists.  
-5. **Automated Royalties:** Each play triggers a smart contract event, instantly distributing funds to contributors.
+## Getting Started
 
-## 📈 Differentiation from Existing Platforms
+### Prerequisites
 
-- **Versus Audius:** Offers true lossless audio and built-in AI personalization rather than compressed streams.  
-- **Versus Royal:** Provides ongoing, daily utility—exclusive streaming and community features—not just NFT sales.  
-- **Versus Sound.xyz:** Delivers a full-scale, interactive streaming service with emotional discovery vs. one-off drops.  
-- **Versus Spotify/Tidal:** Ensures fair artist compensation (10× earnings) and ad-free, premium experience.
+- Node.js 18+ installed
+- Basic understanding of React and Next.js
+- An Algorand wallet (Pera, Defly, Exodus, or Lute)
 
-## 🤝 Contributing
+### Installation
 
-We welcome contributions! Please fork the repo, follow coding standards, and submit a pull request. Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+1. Clone this repository:
+   \`\`\`bash
+   git clone https://github.com/yourusername/algokyc.git
+   cd algokyc
+   \`\`\`
 
-## 📄 License
+2. Install dependencies:
+   \`\`\`bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   \`\`\`
 
-This project is licensed under the MIT License.
+3. Run the development server:
+   \`\`\`bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   \`\`\`
 
-## 📬 Contact
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
 
-For questions and partnerships, reach out to Team Auriya.  
-Report issues and feature requests via GitHub Issues.
+## Project Structure
+
+\`\`\`
+├── app/                  # Next.js App Router
+│   ├── dashboard/        # Dashboard pages
+│   │   ├── fill-kyc/     # KYC form page
+│   │   └── page.tsx      # Dashboard main page
+│   ├── globals.css       # Global styles
+│   ├── layout.tsx        # Root layout with providers
+│   └── page.tsx          # Home page with hero section
+├── components/           # React components
+│   ├── connect-wallet-button.tsx  # Wallet connection button
+│   ├── connect-wallet-modal.tsx   # Wallet selection modal
+│   ├── footer.tsx        # Site footer
+│   ├── kyc-status.tsx    # KYC status component
+│   ├── nav.tsx           # Navigation bar
+│   ├── providers.tsx     # Wallet providers setup
+│   ├── theme-toggle.tsx  # Dark/light mode toggle
+│   └── verification-history.tsx   # 3rd party verification history
+└── public/               # Static assets
+\`\`\`
+
+## Features in Detail
+
+### KYC Dashboard
+
+The dashboard provides a comprehensive view of your KYC status:
+
+- **KYC Status**: View your current verification status, level, and submission details
+- **Verification History**: Track which third parties have accessed your KYC information
+- **Fill KYC**: Complete or update your KYC information
+
+### Zero-Knowledge Proofs
+
+AlgoKYC uses zero-knowledge proofs to allow users to prove their identity without revealing sensitive information:
+
+- Verify age without revealing date of birth
+- Confirm address without exposing exact location
+- Validate identity without sharing personal documents
+
+### Third-Party Integration
+
+Services can integrate with AlgoKYC to verify users without handling sensitive data:
+
+- API for verification status checks
+- Webhook notifications for status changes
+- SDK for seamless integration
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- [Algorand](https://www.algorand.com/)
+- [Next.js](https://nextjs.org/)
+- [TXN Lab's use-wallet-react](https://github.com/TxnLab/use-wallet-react)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [Framer Motion](https://www.framer.com/motion/)

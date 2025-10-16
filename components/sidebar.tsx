@@ -24,13 +24,14 @@ export function Sidebar({ isOpen }: SidebarProps) {
     <aside
       className={cn(
         "fixed lg:relative inset-y-0 left-0 z-40 flex flex-col border-r border-[#15b9b7]/20 bg-[#001324] transition-all duration-300 ease-in-out",
-        // Use a min-width for collapsed state on large screens
-        isOpen
-          ? "w-64"
-          : "w-0 lg:w-16 min-w-[56px] lg:min-w-[56px] translate-x-0 lg:translate-x-0",
+        // Mobile: hide completely when closed, full width when open
+        // Desktop: always visible, 64px when closed, 256px when open
+        isOpen 
+          ? "w-64" 
+          : "w-0 -translate-x-full lg:w-16 lg:translate-x-0"
       )}
     >
-      <nav className="flex-1 space-y-1 p-4 overflow-hidden">
+      <nav className="flex-1 space-y-1 px-2 py-4">
         {navigation.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -38,21 +39,22 @@ export function Sidebar({ isOpen }: SidebarProps) {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors whitespace-nowrap",
-                isActive
-                  ? "bg-[#15b9b7]/20 text-[#15b9b7]"
+                "flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                isActive 
+                  ? "bg-[#15b9b7]/20 text-[#15b9b7]" 
                   : "text-white hover:bg-[#15b9b7]/10 hover:text-[#15b9b7]",
-                !isOpen && "justify-center lg:justify-start"
+                // When collapsed, center icons
+                !isOpen && "lg:justify-center lg:px-2"
               )}
+              title={!isOpen ? item.name : undefined}
             >
               <item.icon className="h-5 w-5 flex-shrink-0" />
               <span
                 className={cn(
-                  "transition-opacity ml-2",
-                  isOpen ? "opacity-100" : "opacity-0 lg:opacity-0",
+                  "ml-3 transition-all duration-200",
+                  // Hide text when collapsed
+                  isOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden lg:hidden"
                 )}
-                // Use aria-hidden so collapsed text is not read by screen readers
-                aria-hidden={!isOpen}
               >
                 {item.name}
               </span>
@@ -63,4 +65,3 @@ export function Sidebar({ isOpen }: SidebarProps) {
     </aside>
   )
 }
- 

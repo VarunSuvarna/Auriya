@@ -1,118 +1,77 @@
 "use client"
 
-import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { motion } from "framer-motion"
-import { Clock, FileText, CheckCircle, Plus, Home, User, Settings, LogOut } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { 
+  LayoutDashboard, 
+  CheckCircle, 
+  History, 
+  ShoppingBag, 
+  FileText,
+  Library,
+  Users,
+  Settings,
+  LogOut
+} from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { useWallet } from "@txnlab/use-wallet-react"
-import { toast } from "react-toastify"
+
+const navigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "KYC Status", href: "/dashboard/status", icon: CheckCircle },
+  { name: "Verification History", href: "/dashboard/history", icon: History },
+  { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
+  { name: "Fill KYC", href: "/dashboard/fill-kyc", icon: FileText },
+  { name: "My Library", href: "/library", icon: Library },
+  { name: "New KYC", href: "/dashboard/coin", icon: FileText },
+  { name: "Profile", href: "/dashboard/profile", icon: Users },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+]
 
 export function DashboardSidebar() {
   const pathname = usePathname()
-  const { activeAccount, wallets } = useWallet()
-
-  const disconnectWallets = async () => {
-    try {
-      for (const wallet of wallets) {
-        if (wallet.isConnected) {
-          await wallet.disconnect()
-        }
-      }
-      toast.success("Disconnected from all wallets")
-    } catch (error) {
-      console.error(error)
-      toast.error("Failed to disconnect wallets")
-    }
-  }
-
-  const sidebarItems = [
-    {
-      title: "Dashboard",
-      href: "/dashboard",
-      icon: Home,
-      exact: true,
-    },
-    {
-      title: "KYC Status",
-      href: "/dashboard/status",
-      icon: Clock,
-    },
-    {
-      title: "Verification History",
-      href: "/dashboard/history",
-      icon: CheckCircle,
-    },
-    {
-      title: "Fill KYC",
-      href: "/dashboard/fill-kyc",
-      icon: FileText,
-    },
-    {
-      title: "New KYC",
-      href: "/dashboard/fill-kyc?new=true",
-      icon: Plus,
-    },
-    {
-      title: "Profile",
-      href: "/dashboard/profile",
-      icon: User,
-    },
-    {
-      title: "Settings",
-      href: "/dashboard/settings",
-      icon: Settings,
-    },
-  ]
 
   return (
-    <motion.div
-      className="h-screen w-64 bg-gradient-to-b from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-r fixed left-0 top-0 z-40 pt-16 overflow-y-auto"
-      initial={{ x: -100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-    >
-      <div className="p-4">
-        {activeAccount && (
-          <div className="mb-6 p-3 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-muted-foreground mb-1">Connected Wallet</p>
-            <p className="text-sm font-mono truncate">
-              {activeAccount.address.slice(0, 10)}...{activeAccount.address.slice(-4)}
-            </p>
-          </div>
-        )}
-
-        <div className="space-y-1">
-          {sidebarItems.map((item) => {
-            const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
-
-            return (
-              <Link key={item.href} href={item.href}>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start gap-2 font-normal",
-                    isActive && "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-primary font-medium",
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </Button>
-              </Link>
-            )
-          })}
-
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 font-normal text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 mt-6"
-            onClick={disconnectWallets}
-          >
-            <LogOut className="h-4 w-4" />
-            Disconnect
-          </Button>
-        </div>
+    <aside className="fixed left-0 top-0 h-screen w-64 bg-[#0a1929] border-r border-[#15b9b7]/20 flex flex-col z-30 overflow-y-auto">
+      {/* Logo/Header space */}
+      <div className="h-16 flex items-center px-4 border-b border-[#15b9b7]/20">
+        <h2 className="text-lg font-semibold text-white">Creator Dashboard</h2>
       </div>
-    </motion.div>
+
+      {/* Navigation */}
+      <nav className="flex-1 flex flex-col gap-1 p-4">
+        {navigation.map((item) => {
+          const isActive = pathname === item.href
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-[#15b9b7]/20 text-[#15b9b7]"
+                  : "text-gray-300 hover:bg-[#15b9b7]/10 hover:text-white"
+              )}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <span className="truncate">{item.name}</span>
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* Disconnect button at bottom */}
+      <div className="p-4 border-t border-[#15b9b7]/20 mt-auto">
+        <button
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors w-full"
+          onClick={() => {
+            // Add your disconnect wallet logic here
+            console.log("Disconnect wallet")
+          }}
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Disconnect</span>
+        </button>
+      </div>
+    </aside>
   )
 }

@@ -7,10 +7,15 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen bg-[#001324]">
+      {/* Fixed sidebar on the left */}
       <DashboardSidebar />
-      <div className="pl-64 pt-16">
-        <div className="p-6 max-w-6xl mx-auto">{children}</div>
+      
+      {/* Main content area with left margin to accommodate sidebar */}
+      <div className="flex-1 ml-64">
+        <div className="p-6 pt-20 max-w-7xl mx-auto">
+          {children}
+        </div>
       </div>
     </div>
   )

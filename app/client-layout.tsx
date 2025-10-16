@@ -1,25 +1,38 @@
 "use client"
 
-import type React from "react"
-import { Providers } from "@/components/providers"
+import React from "react"
+import { usePathname } from "next/navigation"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { MusicPlayer } from "@/components/music-player"
-import { useState } from "react"
+import { cn } from "@/lib/utils"
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const pathname = usePathname()
+  const isDashboard = pathname?.startsWith("/dashboard")
 
   return (
-    <Providers>
-      <div className="flex h-screen flex-col overflow-hidden bg-[#001324]">
-        <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar isOpen={sidebarOpen} />
-          <main className="flex-1 overflow-y-auto pb-24 bg-[#001324]">{children}</main>
-        </div>
-        <MusicPlayer />
+    <div className="min-h-screen bg-[#001324] text-white">
+      {/* Header - shows on all pages */}
+      <Header/>
+
+      <div className="flex">
+        {/* Main Sidebar - ONLY show on non-dashboard pages */}
+        {!isDashboard && <Sidebar />}
+
+        {/* Main content area */}
+        <main
+          className={cn(
+            "flex-1 transition-all duration-300",
+            !isDashboard && "ml-16"
+          )}
+        >
+          {children}
+        </main>
       </div>
-    </Providers>
+
+      {/* Music Player - shows on all pages */}
+      <MusicPlayer />
+    </div>
   )
 }

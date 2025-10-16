@@ -14,24 +14,21 @@ const navigation = [
 ]
 
 interface SidebarProps {
-  isOpen: boolean
+  isOpen?: boolean
 }
 
-export function Sidebar({ isOpen }: SidebarProps) {
+export function Sidebar({ isOpen = false }: SidebarProps) {
   const pathname = usePathname()
 
   return (
     <aside
       className={cn(
-        "fixed lg:relative inset-y-0 left-0 z-40 flex flex-col border-r border-[#15b9b7]/20 bg-[#001324] transition-all duration-300 ease-in-out",
-        // Mobile: hide completely when closed, full width when open
-        // Desktop: always visible, 64px when closed, 256px when open
-        isOpen 
-          ? "w-64" 
-          : "w-0 -translate-x-full lg:w-16 lg:translate-x-0"
+        "fixed lg:sticky top-0 left-0 h-screen z-40 flex flex-col border-r border-[#15b9b7]/20 bg-[#001324] transition-all duration-300",
+        // Always show icons on desktop, full sidebar when open
+        isOpen ? "w-64" : "w-16"
       )}
     >
-      <nav className="flex-1 space-y-1 px-2 py-4">
+      <nav className="flex-1 flex flex-col gap-1 p-2 mt-16">
         {navigation.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -39,25 +36,19 @@ export function Sidebar({ isOpen }: SidebarProps) {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                "flex items-center gap-3 rounded-lg p-3 transition-colors group relative",
                 isActive 
                   ? "bg-[#15b9b7]/20 text-[#15b9b7]" 
-                  : "text-white hover:bg-[#15b9b7]/10 hover:text-[#15b9b7]",
-                // When collapsed, center icons
-                !isOpen && "lg:justify-center lg:px-2"
+                  : "text-gray-400 hover:bg-[#15b9b7]/10 hover:text-white"
               )}
               title={!isOpen ? item.name : undefined}
             >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
-              <span
-                className={cn(
-                  "ml-3 transition-all duration-200",
-                  // Hide text when collapsed
-                  isOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden lg:hidden"
-                )}
-              >
-                {item.name}
-              </span>
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {isOpen && (
+                <span className="text-sm font-medium whitespace-nowrap">
+                  {item.name}
+                </span>
+              )}
             </Link>
           )
         })}

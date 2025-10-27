@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Music, TrendingUp, DollarSign, Users, Upload, BarChart3 } from "lucide-react"
 import Link from "next/link"
 
-const stats = [
+const stats = [ 
   { label: "Total Uploads", value: "0", icon: Music, color: "text-accent" },
   { label: "Total Earnings", value: "$0.00", icon: DollarSign, color: "text-green-400" },
   { label: "Total Streams", value: "0", icon: TrendingUp, color: "text-blue-400" },

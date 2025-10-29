@@ -29,17 +29,17 @@ export function MusicPlayer() {
     <>
       <div
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 border-t border-[#15b9b7]/20 bg-[#001324]",
+          "fixed bottom-0 left-0 right-0 z-50 border-t border-[#15b9b7]/20 bg-gradient-to-r from-[#001324] to-[#001a2a] backdrop-blur-md shadow-2xl",
           isExpanded && "hidden",
         )}
       >
         <div className="flex h-20 items-center gap-4 px-4">
           {/* Song Info */}
-          <div className="flex items-center gap-3 w-64 min-w-0 flex-shrink-0">
+          <div className="flex items-center gap-3 w-48 md:w-64 min-w-0 flex-shrink-0">
             <img
               src="/abstract-music-album-cover-purple.jpg"
               alt="Album art"
-              className="h-14 w-14 rounded-lg object-cover flex-shrink-0"
+              className="h-10 w-10 md:h-14 md:w-14 rounded-lg object-cover flex-shrink-0"
             />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate text-white">Sonic Dreams</p>
@@ -74,7 +74,7 @@ export function MusicPlayer() {
               </Button>
               <Button
                 size="icon"
-                className="h-10 w-10 rounded-full bg-[#15b9b7] hover:bg-[#15b9b7]/90"
+                className="h-10 w-10 rounded-full bg-[#15b9b7] hover:bg-[#15b9b7]/90 hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-[#15b9b7]/30"
                 onClick={() => setIsPlaying(!isPlaying)}
               >
                 {isPlaying ? (
@@ -114,9 +114,9 @@ export function MusicPlayer() {
           </div>
 
           {/* Right Controls */}
-          <div className="flex items-center gap-2 w-64 justify-end flex-shrink-0">
-            <Button size="sm" className="gap-2 bg-[#15b9b7] text-white hover:bg-[#15b9b7]/90">
-              Buy Token
+          <div className="flex items-center gap-1 md:gap-2 w-32 md:w-64 justify-end flex-shrink-0">
+            <Button size="sm" className="gap-1 md:gap-2 bg-gradient-to-r from-[#15b9b7] to-[#17cac6] text-white hover:from-[#15b9b7]/90 hover:to-[#17cac6]/90 text-xs md:text-sm px-2 md:px-3 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-[#15b9b7]/30">
+              <span className="hidden sm:inline">Buy </span>Token
             </Button>
             <Button
               size="icon"
@@ -125,14 +125,14 @@ export function MusicPlayer() {
             >
               <List className="h-4 w-4" />
             </Button>
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Volume2 className="h-4 w-4 text-gray-400" />
               <Slider
                 value={[volume]}
                 onValueChange={(value) => setVolume(value[0])}
                 max={100}
                 step={1}
-                className="w-24"
+                className="w-16 md:w-24"
               />
             </div>
             <Button

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Upload, Music, ImageIcon, Check, Loader2 } from "lucide-react"
+import { Upload, Music, ImageIcon, Check, Loader2, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,6 +19,8 @@ export default function UploadPage() {
   const [mintNFT, setMintNFT] = useState(true)
   const [mintToken, setMintToken] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
+  const [audioCID, setAudioCID] = useState<string>("")
+  const [showAudioCID, setShowAudioCID] = useState(false)
 
   const [formData, setFormData] = useState({
     title: "",
@@ -126,9 +128,41 @@ export default function UploadPage() {
                     type="file"
                     accept="audio/*"
                     className="hidden"
-                    onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null
+                      setAudioFile(file)
+                      // Simulate CID generation when file is uploaded
+                      if (file) {
+                        // In a real app, this would be the actual IPFS CID
+                        setAudioCID(`Qm${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`)
+                      } else {
+                        setAudioCID("")
+                      }
+                    }}
                   />
                 </div>
+
+                {/* CID Display */}
+                {audioCID && (
+                  <div className="mt-4 p-4 rounded-lg border border-accent/30 bg-accent/5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium text-accent mb-1">Audio File CID</Label>
+                        <div className="font-mono text-sm bg-secondary/50 p-2 rounded border">
+                          {showAudioCID ? audioCID : "•".repeat(audioCID.length)}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAudioCID(!showAudioCID)}
+                        className="ml-2 h-8 w-8 p-0"
+                      >
+                        {showAudioCID ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>

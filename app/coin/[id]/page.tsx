@@ -1,5 +1,6 @@
 "use client"
 
+import { use } from "react"
 import { ArrowLeft, Share2, Star, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -30,8 +31,8 @@ const mockCoinData = {
   },
 }
 
-export default function CoinPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default function CoinPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const coin = mockCoinData[id as keyof typeof mockCoinData] || mockCoinData["1"]
 
   const isPositive = coin.change24h > 0
@@ -46,24 +47,24 @@ export default function CoinPage({ params }: { params: { id: string } }) {
         </Link>
       </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-4 md:gap-6">
         {/* Main Content */}
-        <div className="space-y-6 min-w-0">
+        <div className="space-y-4 md:space-y-6 min-w-0">
           {/* Header Card */}
           <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-start gap-3 md:gap-4">
                 <img
                   src={coin.coverArt || "/placeholder.svg"}
                   alt={coin.title}
-                  className="h-20 w-20 rounded-lg object-cover"
+                  className="h-16 w-16 md:h-20 md:w-20 rounded-lg object-cover"
                 />
                 <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h1 className="text-2xl font-bold font-space-grotesk text-white">{coin.title}</h1>
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+                    <div className="flex-1">
+                      <h1 className="text-xl md:text-2xl font-bold font-space-grotesk text-white">{coin.title}</h1>
                       <p className="text-white/60">{coin.ticker}</p>
-                      <div className="mt-1 flex items-center gap-2 text-sm text-white/60">
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs md:text-sm text-white/60">
                         <span className="flex items-center gap-1">
                           <span className="h-2 w-2 rounded-full bg-green-500" />
                           {coin.artist}
@@ -78,17 +79,17 @@ export default function CoinPage({ params }: { params: { id: string } }) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="gap-2 border-accent/50 bg-transparent text-white hover:bg-accent/10"
+                        className="gap-1 md:gap-2 border-accent/50 bg-transparent text-white hover:bg-accent/10 text-xs md:text-sm"
                       >
-                        <Share2 className="h-4 w-4" />
-                        Share
+                        <Share2 className="h-3 w-3 md:h-4 md:w-4" />
+                        <span className="hidden sm:inline">Share</span>
                       </Button>
                       <Button
                         size="icon"
                         variant="outline"
-                        className="border-accent/50 bg-transparent text-white hover:bg-accent/10"
+                        className="border-accent/50 bg-transparent text-white hover:bg-accent/10 h-8 w-8 md:h-10 md:w-10"
                       >
-                        <Star className="h-4 w-4" />
+                        <Star className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     </div>
                   </div>
@@ -96,12 +97,12 @@ export default function CoinPage({ params }: { params: { id: string } }) {
               </div>
 
               {/* Market Stats */}
-              <div className="mt-6 grid grid-cols-2 gap-4">
+              <div className="mt-4 md:mt-6 grid grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <p className="text-sm text-white/60">Market Cap</p>
-                  <p className="text-3xl font-bold text-white">${(coin.marketCap / 1000000).toFixed(1)}M</p>
+                  <p className="text-xs md:text-sm text-white/60">Market Cap</p>
+                  <p className="text-2xl md:text-3xl font-bold text-white">${(coin.marketCap / 1000000).toFixed(1)}M</p>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className={`text-sm font-semibold ${isPositive ? "text-green-400" : "text-red-400"}`}>
+                    <span className={`text-xs md:text-sm font-semibold ${isPositive ? "text-green-400" : "text-red-400"}`}>
                       {isPositive ? "+" : ""}${((coin.marketCap * (coin.change24h / 100)) / 1000).toFixed(1)}K (
                       {isPositive ? "+" : ""}
                       {coin.change24h.toFixed(2)}%)
@@ -110,8 +111,8 @@ export default function CoinPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-white/60">ATH</p>
-                  <p className="text-xl font-semibold text-white">${(coin.ath / 1000000).toFixed(1)}M</p>
+                  <p className="text-xs md:text-sm text-white/60">ATH</p>
+                  <p className="text-lg md:text-xl font-semibold text-white">${(coin.ath / 1000000).toFixed(1)}M</p>
                 </div>
               </div>
 
@@ -131,7 +132,7 @@ export default function CoinPage({ params }: { params: { id: string } }) {
           <TradingChart coin={coin} />
 
           {/* Stats Row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
             {[
               { label: "Vol 24h", value: `$${(coin.volume24h / 1000).toFixed(1)}K` },
               { label: "Price", value: `$${coin.price.toFixed(7)}` },
@@ -139,9 +140,9 @@ export default function CoinPage({ params }: { params: { id: string } }) {
               { label: "1h", value: "-22.25%", negative: true },
             ].map((stat, i) => (
               <Card key={i} className="border-[#15b9b7]/20 bg-[#001324]">
-                <CardContent className="p-4 text-center">
+                <CardContent className="p-3 md:p-4 text-center">
                   <p className="text-xs text-white/60">{stat.label}</p>
-                  <p className={`text-lg font-semibold ${stat.negative ? "text-red-400" : "text-white"}`}>
+                  <p className={`text-base md:text-lg font-semibold ${stat.negative ? "text-red-400" : "text-white"}`}>
                     {stat.value}
                   </p>
                 </CardContent>
@@ -151,23 +152,23 @@ export default function CoinPage({ params }: { params: { id: string } }) {
 
           {/* Description & Tabs */}
           <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <p className="text-sm text-white/70 mb-4">{coin.description}</p>
 
               <Tabs defaultValue="comments">
                 <TabsList className="bg-[#001324] border border-[#15b9b7]/20">
-                  <TabsTrigger value="comments" className="text-white data-[state=active]:bg-[#15b9b7]/20">
+                  <TabsTrigger value="comments" className="text-white data-[state=active]:bg-[#15b9b7]/20 text-sm">
                     Comments
                   </TabsTrigger>
-                  <TabsTrigger value="trades" className="text-white data-[state=active]:bg-[#15b9b7]/20">
+                  <TabsTrigger value="trades" className="text-white data-[state=active]:bg-[#15b9b7]/20 text-sm">
                     Trades
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="comments" className="mt-4">
-                  <div className="text-center py-8 text-white/60">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>No comments yet. Be the first to comment!</p>
+                  <div className="text-center py-6 md:py-8 text-white/60">
+                    <MessageCircle className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm md:text-base">No comments yet. Be the first to comment!</p>
                   </div>
                 </TabsContent>
 
@@ -180,16 +181,16 @@ export default function CoinPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* Right Sidebar */}
-        <div className="space-y-4 min-w-0 lg:min-w-[400px]">
+        <div className="space-y-3 md:space-y-4 min-w-0 lg:min-w-[400px]">
           {/* Trade Panel */}
           <TradePanel coin={coin} />
 
           {/* Bonding Curve Progress */}
           <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-white">Bonding Curve Progress</h3>
-                <span className="text-sm font-bold text-[#15b9b7]">{coin.bondingCurveProgress}%</span>
+                <h3 className="text-xs md:text-sm font-semibold text-white">Bonding Curve Progress</h3>
+                <span className="text-xs md:text-sm font-bold text-[#15b9b7]">{coin.bondingCurveProgress}%</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-[#15b9b7]/20 mb-2">
                 <div className="h-full bg-[#15b9b7]" style={{ width: `${coin.bondingCurveProgress}%` }} />
@@ -200,7 +201,7 @@ export default function CoinPage({ params }: { params: { id: string } }) {
 
           {/* Position & Trades */}
           <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-white/60">POSITION</span>
                 <span className="text-white/60">TRADES COMPLETED</span>
@@ -210,17 +211,17 @@ export default function CoinPage({ params }: { params: { id: string } }) {
 
           {/* Chat */}
           <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold flex items-center gap-2 text-white">
-                  <MessageCircle className="h-4 w-4 text-[#15b9b7]" />
+                <h3 className="text-xs md:text-sm font-semibold flex items-center gap-2 text-white">
+                  <MessageCircle className="h-3 w-3 md:h-4 md:w-4 text-[#15b9b7]" />
                   {coin.ticker} chat
                 </h3>
                 <span className="text-xs text-white/60">1.4K members</span>
               </div>
               <Button
                 variant="outline"
-                className="w-full gap-2 border-[#15b9b7]/50 bg-transparent text-white hover:bg-[#15b9b7]/10"
+                className="w-full gap-2 border-[#15b9b7]/50 bg-transparent text-white hover:bg-[#15b9b7]/10 text-sm"
               >
                 <MessageCircle className="h-4 w-4" />
                 Join chat

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Upload, Music, ImageIcon, Check, Loader2 } from "lucide-react"
+import { useState, useRef } from "react"
+import { Upload, Music, ImageIcon, Check, Loader2, Eye, EyeOff, X, Play, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,6 +19,13 @@ export default function UploadPage() {
   const [mintNFT, setMintNFT] = useState(true)
   const [mintToken, setMintToken] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
+  const [audioCID, setAudioCID] = useState<string>("")
+  const [showAudioCID, setShowAudioCID] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [audioPreview, setAudioPreview] = useState<string | null>(null)
+  const [coverPreview, setCoverPreview] = useState<string | null>(null)
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   const [formData, setFormData] = useState({
     title: "",
@@ -50,6 +57,66 @@ export default function UploadPage() {
       setIsUploading(false)
       alert("Song uploaded and minted successfully!")
     }, 3000)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent, type: 'audio' | 'image') => {
+    e.preventDefault()
+    setIsDragging(false)
+    const files = Array.from(e.dataTransfer.files)
+    const file = files[0]
+    
+    if (type === 'audio' && file?.type.startsWith('audio/')) {
+      setAudioFile(file)
+      setAudioPreview(URL.createObjectURL(file))
+      setAudioCID(`Qm${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`)
+    } else if (type === 'image' && file?.type.startsWith('image/')) {
+      setCoverArt(file)
+      setCoverPreview(URL.createObjectURL(file))
+    }
+  }
+
+  const handleFileSelect = (file: File, type: 'audio' | 'image') => {
+    if (type === 'audio') {
+      setAudioFile(file)
+      setAudioPreview(URL.createObjectURL(file))
+      setAudioCID(`Qm${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`)
+    } else {
+      setCoverArt(file)
+      setCoverPreview(URL.createObjectURL(file))
+    }
+  }
+
+  const toggleAudioPreview = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause()
+      } else {
+        audioRef.current.play()
+      }
+      setIsPlaying(!isPlaying)
+    }
+  }
+
+  const removeFile = (type: 'audio' | 'image') => {
+    if (type === 'audio') {
+      setAudioFile(null)
+      setAudioPreview(null)
+      setAudioCID("")
+      setIsPlaying(false)
+    } else {
+      setCoverArt(null)
+      setCoverPreview(null)
+    }
   }
 
   return (
@@ -103,22 +170,72 @@ export default function UploadPage() {
                 <Label className="text-base font-semibold mb-4 block">Upload Audio File</Label>
                 <div
                   className={cn(
-                    "border-2 border-dashed rounded-xl p-12 text-center transition-colors cursor-pointer",
-                    audioFile ? "border-accent bg-accent/5" : "border-border hover:border-accent/50",
+                    "border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer group",
+                    audioFile ? "border-accent bg-accent/10" : "border-border hover:border-accent/50 hover:bg-accent/5",
+                    isDragging && "border-accent bg-accent/10 scale-105"
                   )}
-                  onClick={() => document.getElementById("audio-upload")?.click()}
+                  onClick={() => !audioFile && document.getElementById("audio-upload")?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, 'audio')}
                 >
                   {audioFile ? (
-                    <div className="space-y-2">
-                      <Music className="h-12 w-12 mx-auto text-accent" />
-                      <p className="font-medium">{audioFile.name}</p>
-                      <p className="text-sm text-muted-foreground">{(audioFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="relative">
+                            <Music className="h-12 w-12 text-accent" />
+                            {audioPreview && (
+                              <Button
+                                size="sm"
+                                className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-accent hover:bg-accent/90"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleAudioPreview()
+                                }}
+                              >
+                                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                              </Button>
+                            )}
+                          </div>
+                          <div className="text-left">
+                            <p className="font-medium">{audioFile.name}</p>
+                            <p className="text-sm text-muted-foreground">{(audioFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeFile('audio')
+                          }}
+                          className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      {audioPreview && (
+                        <audio
+                          ref={audioRef}
+                          src={audioPreview}
+                          onEnded={() => setIsPlaying(false)}
+                          className="hidden"
+                        />
+                      )}
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
-                      <p className="font-medium">Click to upload audio file</p>
-                      <p className="text-sm text-muted-foreground">MP3, WAV, or OGG (max 30MB)</p>
+                    <div className="space-y-4">
+                      <Upload className={cn(
+                        "h-12 w-12 mx-auto transition-all duration-300",
+                        isDragging ? "text-accent scale-110" : "text-muted-foreground group-hover:text-accent"
+                      )} />
+                      <div>
+                        <p className="font-medium group-hover:text-accent transition-colors">
+                          {isDragging ? "Drop your audio file here" : "Drag & drop or click to upload"}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">MP3, WAV, or OGG (max 30MB)</p>
+                      </div>
                     </div>
                   )}
                   <input
@@ -126,31 +243,95 @@ export default function UploadPage() {
                     type="file"
                     accept="audio/*"
                     className="hidden"
-                    onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleFileSelect(file, 'audio')
+                    }}
                   />
                 </div>
+
+                {/* CID Display */}
+                {audioCID && (
+                  <div className="mt-4 p-4 rounded-lg border border-accent/30 bg-accent/5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium text-accent mb-1">Audio File CID</Label>
+                        <div className="font-mono text-sm bg-secondary/50 p-2 rounded border">
+                          {showAudioCID ? audioCID : "•".repeat(audioCID.length)}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAudioCID(!showAudioCID)}
+                        className="ml-2 h-8 w-8 p-0"
+                      >
+                        {showAudioCID ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
                 <Label className="text-base font-semibold mb-4 block">Upload Cover Art</Label>
                 <div
                   className={cn(
-                    "border-2 border-dashed rounded-xl p-12 text-center transition-colors cursor-pointer",
-                    coverArt ? "border-accent bg-accent/5" : "border-border hover:border-accent/50",
+                    "border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer group relative overflow-hidden",
+                    coverArt ? "border-accent bg-accent/10" : "border-border hover:border-accent/50 hover:bg-accent/5",
+                    isDragging && "border-accent bg-accent/10 scale-105"
                   )}
-                  onClick={() => document.getElementById("cover-upload")?.click()}
+                  onClick={() => !coverArt && document.getElementById("cover-upload")?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, 'image')}
                 >
                   {coverArt ? (
-                    <div className="space-y-2">
-                      <ImageIcon className="h-12 w-12 mx-auto text-accent" />
-                      <p className="font-medium">{coverArt.name}</p>
-                      <p className="text-sm text-muted-foreground">{(coverArt.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          {coverPreview ? (
+                            <div className="relative">
+                              <img
+                                src={coverPreview}
+                                alt="Cover preview"
+                                className="h-16 w-16 rounded-lg object-cover border border-accent/30"
+                              />
+                              <div className="absolute inset-0 bg-black/20 rounded-lg" />
+                            </div>
+                          ) : (
+                            <ImageIcon className="h-12 w-12 text-accent" />
+                          )}
+                          <div className="text-left">
+                            <p className="font-medium">{coverArt.name}</p>
+                            <p className="text-sm text-muted-foreground">{(coverArt.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeFile('image')
+                          }}
+                          className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground" />
-                      <p className="font-medium">Click to upload cover art</p>
-                      <p className="text-sm text-muted-foreground">JPG, PNG (min 1000x1000px)</p>
+                    <div className="space-y-4">
+                      <ImageIcon className={cn(
+                        "h-12 w-12 mx-auto transition-all duration-300",
+                        isDragging ? "text-accent scale-110" : "text-muted-foreground group-hover:text-accent"
+                      )} />
+                      <div>
+                        <p className="font-medium group-hover:text-accent transition-colors">
+                          {isDragging ? "Drop your image here" : "Drag & drop or click to upload"}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">JPG, PNG (min 1000x1000px)</p>
+                      </div>
                     </div>
                   )}
                   <input
@@ -158,7 +339,10 @@ export default function UploadPage() {
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => setCoverArt(e.target.files?.[0] || null)}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleFileSelect(file, 'image')
+                    }}
                   />
                 </div>
               </div>

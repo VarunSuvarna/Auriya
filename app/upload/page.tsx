@@ -1,7 +1,10 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Upload, Music, ImageIcon, Check, Loader2, Eye, EyeOff, X, Play, Pause } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Upload, Music, ImageIcon, Check, Loader2, Eye, EyeOff, X, Play, Pause, AlertCircle } from "lucide-react"
+// import { IPFSService } from "@/lib/ipfs"
+import { AlgorandService } from "@/lib/algorand"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,13 +16,18 @@ import { cn } from "@/lib/utils"
 const steps = ["Upload", "Metadata", "Mint Options", "Confirm"]
 
 export default function UploadPage() {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [coverArt, setCoverArt] = useState<File | null>(null)
   const [mintNFT, setMintNFT] = useState(true)
   const [mintToken, setMintToken] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadStatus, setUploadStatus] = useState<string>("")
+  const [error, setError] = useState<string | null>(null)
   const [audioCID, setAudioCID] = useState<string>("")
+  const [coverCID, setCoverCID] = useState<string>("")
   const [showAudioCID, setShowAudioCID] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -50,13 +58,41 @@ export default function UploadPage() {
     }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsUploading(true)
-    // Simulate upload
-    setTimeout(() => {
+    try {
+      const songData = {
+        title: formData.title,
+        artist: formData.artist,
+        cover_art: coverPreview || '/placeholder.svg',
+        audio_url: audioPreview || '',
+        price: parseFloat(formData.price) || 0,
+        market_cap: Math.floor(Math.random() * 200000) + 50000,
+        change_24h: (Math.random() - 0.5) * 40,
+        holders: Math.floor(Math.random() * 500) + 50,
+        ticker: formData.ticker,
+        duration: '3:45',
+        genre: 'Electronic',
+        description: formData.description
+      }
+
+      const response = await fetch('/api/songs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(songData)
+      })
+
+      if (response.ok) {
+        alert('Song uploaded and minted successfully!')
+        router.push('/')
+      } else {
+        throw new Error('Upload failed')
+      }
+    } catch (error) {
+      alert('Upload failed. Please try again.')
+    } finally {
       setIsUploading(false)
-      alert("Song uploaded and minted successfully!")
-    }, 3000)
+    }
   }
 
   const handleDragOver = (e: React.DragEvent) => {

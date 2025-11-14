@@ -5,6 +5,7 @@ import { Play, Pause, TrendingUp, TrendingDown, Heart, MoreHorizontal, Share } f
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useRealtime } from "@/hooks/useRealtime"
 import { cn } from "@/lib/utils"
 
 interface SongCardProps {
@@ -27,18 +28,42 @@ export function SongCard({ song, onPlay }: SongCardProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const isPositive = song.change24h > 0
+  const { tokenPrices, playCounts, incrementPlayCount, addActivity } = useRealtime()
+  
+  const currentPrice = tokenPrices[song.id] || song.price
+  const priceChange = ((currentPrice - song.price) / song.price) * 100
+  const isPositive = priceChange > 0
+  const currentPlayCount = playCounts[song.id] || 0
 
   const handlePlayPause = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setIsPlaying(!isPlaying)
+    
+    if (!isPlaying) {
+      incrementPlayCount(song.id)
+      addActivity({
+        type: 'play',
+        song_title: song.title,
+        artist: song.artist,
+        user: 'You'
+      })
+    }
   }
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setIsLiked(!isLiked)
+    
+    if (!isLiked) {
+      addActivity({
+        type: 'like',
+        song_title: song.title,
+        artist: song.artist,
+        user: 'You'
+      })
+    }
   }
 
   return (
@@ -116,8 +141,9 @@ export function SongCard({ song, onPlay }: SongCardProps) {
             )}
           >
             {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-            {Math.abs(song.change24h).toFixed(1)}%
+            {Math.abs(priceChange).toFixed(1)}%
           </div>
+
 
           {isPlaying && (
             <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-[#15b9b7]/20 backdrop-blur rounded-full px-2 py-1">
@@ -137,6 +163,12 @@ export function SongCard({ song, onPlay }: SongCardProps) {
               <span className="text-xs text-[#15b9b7] font-medium">Playing</span>
             </div>
           )}
+          
+          {currentPlayCount > 0 && (
+            <div className="absolute bottom-3 right-3 bg-[#15b9b7]/20 backdrop-blur rounded-full px-2 py-1">
+              <span className="text-xs text-[#15b9b7] font-medium">+{currentPlayCount} plays</span>
+            </div>
+          )}
         </div>
 
         <div className="p-3 md:p-4 relative">
@@ -154,7 +186,12 @@ export function SongCard({ song, onPlay }: SongCardProps) {
             </div>
             <div className="text-right group/stat">
               <p className="text-xs text-gray-400 group-hover/stat:text-gray-300 transition-colors">Price</p>
-              <p className="font-semibold text-[#15b9b7] group-hover/stat:text-white transition-colors">{song.price} ALGO</p>
+              <p className={cn(
+                "font-semibold group-hover/stat:text-white transition-colors",
+                currentPrice !== song.price ? "text-[#15b9b7] animate-pulse" : "text-[#15b9b7]"
+              )}>
+                {currentPrice.toFixed(2)} ALGO
+              </p>
             </div>
           </div>
 

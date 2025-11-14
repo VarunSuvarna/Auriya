@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { SongCard } from "@/components/song-card"
+import { RealtimeActivity } from "@/components/realtime-activity"
+import { RealtimeStats } from "@/components/realtime-stats"
 import { TrendingUp, Flame, Clock, Play, Shuffle, Heart } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -204,16 +206,36 @@ export default function Home() {
           </h1>
           <p className="text-lg text-gray-300 mb-6">Stream, collect, and trade song tokens on Algorand</p>
           <div className="flex gap-4">
-            <Button className="bg-[#15b9b7] hover:bg-[#15b9b7]/90 text-white gap-2 group/btn">
+            <Button 
+              className="bg-[#15b9b7] hover:bg-[#15b9b7]/90 text-white gap-2 group/btn"
+              onClick={() => {
+                const firstSong = mockSongs[0]
+                window.dispatchEvent(new CustomEvent('playSong', { detail: firstSong }))
+              }}
+            >
               <Play className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
               Start Listening
             </Button>
-            <Button variant="outline" className="border-[#15b9b7]/30 text-[#15b9b7] hover:bg-[#15b9b7]/10 gap-2">
+            <Button 
+              variant="outline" 
+              className="border-[#15b9b7]/30 text-[#15b9b7] hover:bg-[#15b9b7]/10 gap-2"
+              onClick={() => {
+                const shuffledSongs = [...mockSongs].sort(() => Math.random() - 0.5)
+                const randomSong = shuffledSongs[0]
+                window.dispatchEvent(new CustomEvent('playSong', { detail: randomSong }))
+                window.dispatchEvent(new CustomEvent('enableShuffle'))
+              }}
+            >
               <Shuffle className="h-4 w-4" />
               Shuffle Play
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Realtime Stats */}
+      <div className="mb-8">
+        <RealtimeStats />
       </div>
 
       {/* Tabs for filtering */}
@@ -240,7 +262,6 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {mockSongs.map((song) => (
               <SongCard key={song.id} song={song} onPlay={(selectedSong) => {
-                // This will be handled by a global music player context
                 window.dispatchEvent(new CustomEvent('playSong', { detail: selectedSong }))
               }} />
             ))}
@@ -270,44 +291,56 @@ export default function Home() {
         </TabsContent>
       </Tabs>
 
-      {/* Recently Played */}
-      <div className="mt-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold font-space-grotesk text-white">Recently Played</h2>
-          <Button variant="ghost" className="text-[#15b9b7] hover:text-white hover:bg-[#15b9b7]/10">
-            View All
-          </Button>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {mockSongs.slice(6, 12).map((song) => (
-            <div
-              key={song.id}
-              className="group cursor-pointer p-3 rounded-lg hover:bg-[#15b9b7]/5 transition-all duration-300"
-              onMouseEnter={() => setHoveredCard(song.id)}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="relative aspect-square mb-3">
-                <img
-                  src={song.coverArt}
-                  alt={song.title}
-                  className="w-full h-full object-cover rounded-lg transition-all duration-300 group-hover:scale-105"
-                />
-                <Button
-                  size="icon"
-                  className={cn(
-                    "absolute bottom-2 right-2 h-10 w-10 rounded-full bg-[#15b9b7] hover:bg-[#15b9b7]/90 transition-all duration-300 shadow-lg",
-                    hoveredCard === song.id ? "opacity-100 scale-110" : "opacity-0 scale-100"
-                  )}
-                >
-                  <Play className="h-4 w-4 text-white ml-0.5 fill-white" />
-                </Button>
+      {/* Recently Played & Live Activity */}
+      <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold font-space-grotesk text-white">Recently Played</h2>
+            <Button variant="ghost" className="text-[#15b9b7] hover:text-white hover:bg-[#15b9b7]/10">
+              View All
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {mockSongs.slice(6, 12).map((song) => (
+              <div
+                key={song.id}
+                className="group cursor-pointer p-3 rounded-lg hover:bg-[#15b9b7]/5 transition-all duration-300"
+                onMouseEnter={() => setHoveredCard(song.id)}
+                onMouseLeave={() => setHoveredCard(null)}
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('playSong', { detail: song }))
+                }}
+              >
+                <div className="relative aspect-square mb-3">
+                  <img
+                    src={song.coverArt}
+                    alt={song.title}
+                    className="w-full h-full object-cover rounded-lg transition-all duration-300 group-hover:scale-105"
+                  />
+                  <Button
+                    size="icon"
+                    className={cn(
+                      "absolute bottom-2 right-2 h-10 w-10 rounded-full bg-[#15b9b7] hover:bg-[#15b9b7]/90 transition-all duration-300 shadow-lg",
+                      hoveredCard === song.id ? "opacity-100 scale-110" : "opacity-0 scale-100"
+                    )}
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('playSong', { detail: song }))
+                    }}
+                  >
+                    <Play className="h-4 w-4 text-white ml-0.5 fill-white" />
+                  </Button>
+                </div>
+                <h4 className="font-medium text-white text-sm truncate group-hover:text-[#15b9b7] transition-colors">
+                  {song.title}
+                </h4>
+                <p className="text-xs text-gray-400 truncate">{song.artist}</p>
               </div>
-              <h4 className="font-medium text-white text-sm truncate group-hover:text-[#15b9b7] transition-colors">
-                {song.title}
-              </h4>
-              <p className="text-xs text-gray-400 truncate">{song.artist}</p>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+        
+        <div className="lg:col-span-1">
+          <RealtimeActivity />
         </div>
       </div>
     </div>

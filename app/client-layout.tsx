@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { MusicPlayer } from "@/components/music-player"
+
 import { Providers } from "@/components/providers"
 import { cn } from "@/lib/utils"
 

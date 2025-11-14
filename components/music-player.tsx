@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
+import { useRealtime } from "@/hooks/useRealtime"
 import { cn } from "@/lib/utils"
 
 export function MusicPlayer() {
@@ -25,7 +26,11 @@ export function MusicPlayer() {
   const [volume, setVolume] = useState(70)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
+  const [isShuffled, setIsShuffled] = useState(false)
+  const [isRepeating, setIsRepeating] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const { incrementPlayCount, addActivity } = useRealtime()
+
   const [currentSong, setCurrentSong] = useState({
     id: "1",
     title: "Chill Vibes",
@@ -35,11 +40,14 @@ export function MusicPlayer() {
     duration: "4:15",
     currentTime: "0:00"
   })
-  const [queue, setQueue] = useState([
+  const [originalQueue] = useState([
     { id: "2", title: "Electronic Dreams", artist: "Synth Master", coverArt: "/electronic-music-cover-cyan.jpg", audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/soundtrack.mp3" },
     { id: "3", title: "Ocean Waves", artist: "Nature Sounds", coverArt: "/ocean-waves-music-cover.jpg", audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/pyman_assets/intromusic.ogg" },
-    { id: "4", title: "Desert Mirage", artist: "Sahara Beats", coverArt: "/desert-music-album-orange.jpg", audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/thrust.mp3" }
+    { id: "4", title: "Desert Mirage", artist: "Sahara Beats", coverArt: "/desert-music-album-orange.jpg", audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/thrust.mp3" },
+    { id: "5", title: "Neon Nights", artist: "Cyber City", coverArt: "/neon-city-night-music.jpg", audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3" },
+    { id: "6", title: "Forest Whispers", artist: "Green Valley", coverArt: "/forest-nature-music-green.jpg", audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/pyman_assets/intromusic.ogg" }
   ])
+  const [queue, setQueue] = useState(originalQueue)
   const [showQueue, setShowQueue] = useState(false)
 
   const togglePlayPause = async () => {
@@ -126,6 +134,15 @@ export function MusicPlayer() {
     })
     setProgress(0)
     
+    // Track play activity
+    incrementPlayCount(song.id)
+    addActivity({
+      type: 'play',
+      song_title: song.title,
+      artist: song.artist,
+      user: 'You'
+    })
+    
     if (audioRef.current && song.audioUrl) {
       audioRef.current.src = song.audioUrl
       audioRef.current.load()
@@ -140,6 +157,40 @@ export function MusicPlayer() {
         // Silently handle song loading errors
         setIsPlaying(false)
       }
+    }
+  }
+
+  const shuffleArray = (array: any[]) => {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+  }
+
+  const toggleShuffle = () => {
+    setIsShuffled(!isShuffled)
+    if (!isShuffled) {
+      setQueue(shuffleArray(originalQueue))
+    } else {
+      setQueue(originalQueue)
+    }
+  }
+
+  const playNext = () => {
+    if (queue.length > 0) {
+      const nextSong = queue[0]
+      playSong({ ...nextSong, duration: "4:12" })
+      setQueue(prev => prev.slice(1))
+    }
+  }
+
+  const playPrevious = () => {
+    // In a real app, you'd maintain a history of played songs
+    if (originalQueue.length > 0) {
+      const randomSong = originalQueue[Math.floor(Math.random() * originalQueue.length)]
+      playSong({ ...randomSong, duration: "4:12" })
     }
   }
 
@@ -193,8 +244,17 @@ export function MusicPlayer() {
       playSong(song)
     }
 
+    const handleEnableShuffle = () => {
+      setIsShuffled(true)
+      setQueue(shuffleArray(originalQueue))
+    }
+
     window.addEventListener('playSong', handlePlaySong)
-    return () => window.removeEventListener('playSong', handlePlaySong)
+    window.addEventListener('enableShuffle', handleEnableShuffle)
+    return () => {
+      window.removeEventListener('playSong', handlePlaySong)
+      window.removeEventListener('enableShuffle', handleEnableShuffle)
+    }
   }, [])
 
   return (
@@ -234,7 +294,11 @@ export function MusicPlayer() {
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 hover:bg-[#15b9b7]/10 text-gray-400 hover:text-white"
+                className={cn(
+                  "h-8 w-8 hover:bg-[#15b9b7]/10 transition-colors",
+                  isShuffled ? "text-[#15b9b7] bg-[#15b9b7]/10" : "text-gray-400 hover:text-white"
+                )}
+                onClick={toggleShuffle}
               >
                 <Shuffle className="h-4 w-4" />
               </Button>
@@ -242,6 +306,7 @@ export function MusicPlayer() {
                 size="icon"
                 variant="ghost"
                 className="h-8 w-8 hover:bg-[#15b9b7]/10 text-gray-400 hover:text-white"
+                onClick={playPrevious}
               >
                 <SkipBack className="h-4 w-4" />
               </Button>
@@ -260,13 +325,18 @@ export function MusicPlayer() {
                 size="icon"
                 variant="ghost"
                 className="h-8 w-8 hover:bg-[#15b9b7]/10 text-gray-400 hover:text-white"
+                onClick={playNext}
               >
                 <SkipForward className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 hover:bg-[#15b9b7]/10 text-gray-400 hover:text-white"
+                className={cn(
+                  "h-8 w-8 hover:bg-[#15b9b7]/10 transition-colors",
+                  isRepeating ? "text-[#15b9b7] bg-[#15b9b7]/10" : "text-gray-400 hover:text-white"
+                )}
+                onClick={() => setIsRepeating(!isRepeating)}
               >
                 <Repeat className="h-4 w-4" />
               </Button>
@@ -353,7 +423,20 @@ export function MusicPlayer() {
         <audio
           ref={audioRef}
           onTimeUpdate={handleTimeUpdate}
-          onEnded={() => setIsPlaying(false)}
+          onEnded={() => {
+            setIsPlaying(false)
+            if (isRepeating) {
+              setTimeout(() => {
+                if (audioRef.current) {
+                  audioRef.current.currentTime = 0
+                  audioRef.current.play()
+                  setIsPlaying(true)
+                }
+              }, 500)
+            } else {
+              playNext()
+            }
+          }}
           onLoadedMetadata={() => {
             if (audioRef.current && isFinite(audioRef.current.duration) && audioRef.current.duration > 0) {
               const duration = audioRef.current.duration

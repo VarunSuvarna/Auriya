@@ -1,21 +1,24 @@
 "use client"
 
+import { use } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, TrendingUp, TrendingDown, Users, Activity } from "lucide-react"
-import { useRealtime } from "@/hooks/useRealtime"
+
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { useRealtime } from "@/hooks/useRealtime"
 
-export default function CoinPage() {
+export default function CoinPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const { tokenPrices, activeListeners, addActivity } = useRealtime()
-  const currentPrice = tokenPrices['1'] || 2.5
+  const currentPrice = tokenPrices[id] || 2.5
   const priceChange = ((currentPrice - 2.5) / 2.5) * 100
   const isPositive = priceChange > 0
 
   const handleBuyToken = () => {
     addActivity({
       type: 'purchase',
-      songTitle: 'Music Token',
+      song_title: 'Music Token',
       artist: 'Various Artists',
       user: 'You'
     })

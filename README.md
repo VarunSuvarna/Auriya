@@ -221,17 +221,17 @@ Price = Virtual_ALGO_Reserve / Virtual_Token_Reserve
 ## **📈 Roadmap**
 
 ### **Phase 1: MVP (Current)** ✅
-- [x] Frontend with discover page
-- [x] Pera Wallet integration
-- [x] Creator dashboard UI
-- [x] Responsive design
-- [x] Smart contracts (ARC-3, ARC-20)
+- [ ] Frontend with discover page
+- [ ] Pera Wallet integration
+- [ ] Creator dashboard UI
+- [ ] Responsive design
+- [ ] Smart contracts (ARC-3, ARC-20)
 
 ### **Phase 2: Smart Contracts** 🔄
-- [x] MusicNFT contract (ARC-3)
-- [x] FungibleToken contract (ARC-20)
-- [x] RoyaltySplitter contract
-- [x] DAOGovernance contract
+- [ ] MusicNFT contract (ARC-3)
+- [ ] FungibleToken contract (ARC-20)
+- [ ] RoyaltySplitter contract
+- [ ] DAOGovernance contract
 - [ ] TestNet deployment
 
 ### **Phase 3: Backend & Storage** 📅

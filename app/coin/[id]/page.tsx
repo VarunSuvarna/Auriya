@@ -1,235 +1,101 @@
 "use client"
 
-import { ArrowLeft, Share2, Star, MessageCircle } from "lucide-react"
+import { use } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ArrowLeft, TrendingUp, TrendingDown, Users, Activity } from "lucide-react"
+
+import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { TradingChart } from "@/components/trading-chart"
-import { TradePanel } from "@/components/trade-panel"
-import { TopHolders } from "@/components/top-holders"
-import { TradesTable } from "@/components/trades-table"
+import { useRealtime } from "@/hooks/useRealtime"
 
-// Mock data
-const mockCoinData = {
-  "1": {
-    id: "1",
-    title: "Midnight Dreams",
-    artist: "Luna Wave",
-    ticker: "MDNT",
-    coverArt: "/abstract-music-album-cover-purple.jpg",
-    marketCap: 7000000,
-    price: 2.5,
-    change24h: 15.3,
-    volume24h: 489232,
-    holders: 234,
-    supply: 1000000,
-    description: "A mesmerizing journey through ambient soundscapes and ethereal melodies.",
-    bondingCurveProgress: 100,
-    ath: 9900000,
-  },
-}
+export default function CoinPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
+  const { tokenPrices, activeListeners, addActivity } = useRealtime()
+  const currentPrice = tokenPrices[id] || 2.5
+  const priceChange = ((currentPrice - 2.5) / 2.5) * 100
+  const isPositive = priceChange > 0
 
-export default function CoinPage({ params }: { params: { id: string } }) {
-  const { id } = params
-  const coin = mockCoinData[id as keyof typeof mockCoinData] || mockCoinData["1"]
-
-  const isPositive = coin.change24h > 0
+  const handleBuyToken = () => {
+    addActivity({
+      type: 'purchase',
+      song_title: 'Music Token',
+      artist: 'Various Artists',
+      user: 'You'
+    })
+  }
 
   return (
-    <div className="container mx-auto px-4 py-6 pb-32 max-w-[1600px]">
-      {/* Back Button */}
-      <Button variant="ghost" size="sm" className="mb-4 gap-2 text-white hover:text-[#15b9b7]" asChild>
-        <Link href="/">
+    <div className="container mx-auto px-6 py-8 max-w-6xl">
+      <Link href="/">
+        <Button variant="ghost" className="mb-6 gap-2 text-[#15b9b7] hover:text-white hover:bg-[#15b9b7]/10">
           <ArrowLeft className="h-4 w-4" />
-          Back
-        </Link>
-      </Button>
+          Back to Home
+        </Button>
+      </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
-        {/* Main Content */}
-        <div className="space-y-6 min-w-0">
-          {/* Header Card */}
-          <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <img
-                  src={coin.coverArt || "/placeholder.svg"}
-                  alt={coin.title}
-                  className="h-20 w-20 rounded-lg object-cover"
-                />
-                <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h1 className="text-2xl font-bold font-space-grotesk text-white">{coin.title}</h1>
-                      <p className="text-white/60">{coin.ticker}</p>
-                      <div className="mt-1 flex items-center gap-2 text-sm text-white/60">
-                        <span className="flex items-center gap-1">
-                          <span className="h-2 w-2 rounded-full bg-green-500" />
-                          {coin.artist}
-                        </span>
-                        <span>•</span>
-                        <span>20d ago</span>
-                        <span>•</span>
-                        <span className="text-accent">by BNK_pump</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-2 border-accent/50 bg-transparent text-white hover:bg-accent/10"
-                      >
-                        <Share2 className="h-4 w-4" />
-                        Share
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="border-accent/50 bg-transparent text-white hover:bg-accent/10"
-                      >
-                        <Star className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Market Stats */}
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-white/60">Market Cap</p>
-                  <p className="text-3xl font-bold text-white">${(coin.marketCap / 1000000).toFixed(1)}M</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className={`text-sm font-semibold ${isPositive ? "text-green-400" : "text-red-400"}`}>
-                      {isPositive ? "+" : ""}${((coin.marketCap * (coin.change24h / 100)) / 1000).toFixed(1)}K (
-                      {isPositive ? "+" : ""}
-                      {coin.change24h.toFixed(2)}%)
-                    </span>
-                    <span className="text-xs text-white/60">24hr</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-white/60">ATH</p>
-                  <p className="text-xl font-semibold text-white">${(coin.ath / 1000000).toFixed(1)}M</p>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="mt-4">
-                <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#17cac6] to-[#0ea39f] transition-all"
-                    style={{ width: `${coin.bondingCurveProgress}%` }}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Trading Chart */}
-          <TradingChart coin={coin} />
-
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[
-              { label: "Vol 24h", value: `$${(coin.volume24h / 1000).toFixed(1)}K` },
-              { label: "Price", value: `$${coin.price.toFixed(7)}` },
-              { label: "5m", value: "-2.24%", negative: true },
-              { label: "1h", value: "-22.25%", negative: true },
-            ].map((stat, i) => (
-              <Card key={i} className="border-[#15b9b7]/20 bg-[#001324]">
-                <CardContent className="p-4 text-center">
-                  <p className="text-xs text-white/60">{stat.label}</p>
-                  <p className={`text-lg font-semibold ${stat.negative ? "text-red-400" : "text-white"}`}>
-                    {stat.value}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+      <div className="space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold font-space-grotesk mb-4 text-white">Token Trading</h1>
+          <p className="text-gray-400">Buy and trade music tokens on Auriya</p>
+          <div className="flex items-center justify-center gap-6 mt-4">
+            <div className="flex items-center gap-2 text-sm">
+              <Users className="h-4 w-4 text-[#15b9b7]" />
+              <span className="text-white">{activeListeners} active traders</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Activity className="h-4 w-4 text-green-400" />
+              <span className="text-white">Live market data</span>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            </div>
           </div>
-
-          {/* Description & Tabs */}
-          <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-6">
-              <p className="text-sm text-white/70 mb-4">{coin.description}</p>
-
-              <Tabs defaultValue="comments">
-                <TabsList className="bg-[#001324] border border-[#15b9b7]/20">
-                  <TabsTrigger value="comments" className="text-white data-[state=active]:bg-[#15b9b7]/20">
-                    Comments
-                  </TabsTrigger>
-                  <TabsTrigger value="trades" className="text-white data-[state=active]:bg-[#15b9b7]/20">
-                    Trades
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="comments" className="mt-4">
-                  <div className="text-center py-8 text-white/60">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>No comments yet. Be the first to comment!</p>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="trades" className="mt-4">
-                  <TradesTable />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Right Sidebar */}
-        <div className="space-y-4 min-w-0 lg:min-w-[400px]">
-          {/* Trade Panel */}
-          <TradePanel coin={coin} />
-
-          {/* Bonding Curve Progress */}
-          <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-white">Bonding Curve Progress</h3>
-                <span className="text-sm font-bold text-[#15b9b7]">{coin.bondingCurveProgress}%</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="rounded-2xl border border-[#15b9b7]/20 bg-gradient-to-br from-[#15b9b7]/10 to-[#15b9b7]/5 p-6">
+            <h2 className="text-2xl font-bold text-white mb-6">Buy Tokens</h2>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-4 rounded-lg bg-[#15b9b7]/10">
+                <span className="text-white">Current Price</span>
+                <div className="text-right">
+                  <span className={cn(
+                    "font-bold text-lg",
+                    currentPrice !== 2.5 ? "text-[#15b9b7] animate-pulse" : "text-[#15b9b7]"
+                  )}>
+                    {currentPrice.toFixed(3)} ALGO
+                  </span>
+                  <div className={cn(
+                    "flex items-center gap-1 text-sm mt-1",
+                    isPositive ? "text-green-400" : "text-red-400"
+                  )}>
+                    {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    <span>{isPositive ? '+' : ''}{priceChange.toFixed(2)}%</span>
+                  </div>
+                </div>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-[#15b9b7]/20 mb-2">
-                <div className="h-full bg-[#15b9b7]" style={{ width: `${coin.bondingCurveProgress}%` }} />
-              </div>
-              <p className="text-xs text-[#15b9b7]">Coin has graduated!</p>
-            </CardContent>
-          </Card>
-
-          {/* Position & Trades */}
-          <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/60">POSITION</span>
-                <span className="text-white/60">TRADES COMPLETED</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Chat */}
-          <Card className="border-[#15b9b7]/20 bg-[#001324]">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold flex items-center gap-2 text-white">
-                  <MessageCircle className="h-4 w-4 text-[#15b9b7]" />
-                  {coin.ticker} chat
-                </h3>
-                <span className="text-xs text-white/60">1.4K members</span>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full gap-2 border-[#15b9b7]/50 bg-transparent text-white hover:bg-[#15b9b7]/10"
+              <Button 
+                className="w-full bg-[#15b9b7] hover:bg-[#15b9b7]/90 text-white py-3"
+                onClick={handleBuyToken}
               >
-                <MessageCircle className="h-4 w-4" />
-                Join chat
+                Buy Now
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Top Holders */}
-          <TopHolders />
+          <div className="rounded-2xl border border-[#15b9b7]/20 bg-gradient-to-br from-[#15b9b7]/5 to-transparent p-6">
+            <h2 className="text-2xl font-bold text-white mb-6">Price Chart</h2>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                {isPositive ? <TrendingUp className="h-5 w-5 text-green-400" /> : <TrendingDown className="h-5 w-5 text-red-400" />}
+                <span className={isPositive ? "text-green-400" : "text-red-400"}>
+                  {isPositive ? '+' : ''}{priceChange.toFixed(1)}% (24h)
+                </span>
+              </div>
+              <div className="h-32 bg-[#15b9b7]/10 rounded-lg flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#15b9b7]/20 to-transparent animate-shimmer"></div>
+                <span className="text-gray-400 relative z-10">Live Chart Coming Soon</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

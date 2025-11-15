@@ -1,0 +1,11 @@
+[project]
+type = 'contract'
+name = 'auriya-contracts'
+
+[project.deploy]
+command = 'poetry run python -m smart_contracts.deploy'
+environment_secrets = []
+
+[project.run]
+build = { commands = ['poetry run puyapy smart_contracts'], description = 'Build contracts' }
+deploy = { commands = ['poetry run python -m smart_contracts.deploy'], description = 'Deploy to network' }

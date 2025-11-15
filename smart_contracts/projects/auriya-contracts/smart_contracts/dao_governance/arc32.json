@@ -1,0 +1,98 @@
+{
+  "name": "DAOGovernance",
+  "version": "1.0.0",
+  "description": "DAO Governance Contract implementing proposal creation and voting with ARC-20 token staking",
+  "networks": {},
+  "methods": [
+    {
+      "name": "initialize",
+      "description": "Initialize the DAO with governance token",
+      "readonly": false,
+      "args": [
+        {
+          "type": "uint64",
+          "name": "token_asset",
+          "description": "Asset ID of the governance token"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "create_proposal",
+      "description": "Create a new governance proposal",
+      "readonly": false,
+      "args": [
+        {
+          "type": "string",
+          "name": "description",
+          "description": "Description of the proposal"
+        }
+      ],
+      "returns": {
+        "type": "uint64",
+        "description": "Proposal ID"
+      }
+    },
+    {
+      "name": "vote",
+      "description": "Vote on a proposal",
+      "readonly": false,
+      "args": [
+        {
+          "type": "uint64",
+          "name": "proposal_id",
+          "description": "ID of the proposal to vote on"
+        },
+        {
+          "type": "bool",
+          "name": "support",
+          "description": "True for support, false for opposition"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "get_result",
+      "description": "Get the result of a proposal",
+      "readonly": true,
+      "args": [
+        {
+          "type": "uint64",
+          "name": "proposal_id",
+          "description": "ID of the proposal"
+        }
+      ],
+      "returns": {
+        "type": "string",
+        "description": "Proposal result status"
+      }
+    }
+  ],
+  "state": {
+    "schema": {
+      "global": {
+        "declared": {
+          "proposal_count": {
+            "type": "uint64",
+            "key": "pc",
+            "description": "Total number of proposals created"
+          },
+          "token_asset_id": {
+            "type": "uint64",
+            "key": "tai",
+            "description": "Asset ID of the governance token"
+          }
+        },
+        "reserved": {}
+      },
+      "local": {
+        "declared": {},
+        "reserved": {}
+      }
+    }
+  }
+}

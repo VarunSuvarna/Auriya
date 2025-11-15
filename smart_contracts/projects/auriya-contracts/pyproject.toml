@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "auriya-contracts"
+version = "1.0.0"
+description = "Auriya Music Platform Smart Contracts"
+authors = ["Auriya Team"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+algokit-utils = "^2.3.0"
+algorand-python = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+algokit-client-generator = "*"
+pytest = "*"
+pytest-cov = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

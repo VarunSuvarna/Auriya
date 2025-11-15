@@ -2,12 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { 
-  LayoutDashboard, 
-  CheckCircle, 
-  History, 
-  ShoppingBag, 
-  FileText,
+import {
+  LayoutDashboard,
+  ShoppingBag,
   Library,
   Users,
   Settings,
@@ -17,12 +14,8 @@ import { cn } from "@/lib/utils"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "KYC Status", href: "/dashboard/status", icon: CheckCircle },
-  { name: "Verification History", href: "/dashboard/history", icon: History },
   { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
-  { name: "Fill KYC", href: "/dashboard/fill-kyc", icon: FileText },
   { name: "My Library", href: "/library", icon: Library },
-  { name: "New KYC", href: "/dashboard/coin", icon: FileText },
   { name: "Profile", href: "/dashboard/profile", icon: Users },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]

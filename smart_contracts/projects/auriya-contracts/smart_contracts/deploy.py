@@ -7,7 +7,7 @@ def deploy_contracts(network: str = "localnet"):
     
     algod_client = get_algod_client()
     
-    print(f"Deploying to {network}...")
+    print(f"Deploying to {network}...") 
     
     # Deploy MusicNFT
     print("Deploying MusicNFT...")

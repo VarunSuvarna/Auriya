@@ -10,9 +10,7 @@ const nextConfig = {
     unoptimized: true,
     domains: ['commondatastorage.googleapis.com'],
   },
-  experimental: {
-    serverComponentsExternalPackages: ['algosdk'],
-  },
+  serverExternalPackages: ['algosdk'],
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -47,5 +45,4 @@ const nextConfig = {
     ];
   },
 }
-
 export default nextConfig

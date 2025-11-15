@@ -1,0 +1,77 @@
+{
+  "name": "RoyaltySplitter",
+  "desc": "Splits incoming payments between predefined parties (artist, producer, platform) with configurable shares",
+  "methods": [
+    {
+      "name": "configure",
+      "desc": "Configure the addresses for royalty distribution",
+      "args": [
+        {
+          "type": "address",
+          "name": "artist",
+          "desc": "Artist address to receive royalties"
+        },
+        {
+          "type": "address", 
+          "name": "producer",
+          "desc": "Producer address to receive royalties"
+        },
+        {
+          "type": "address",
+          "name": "platform",
+          "desc": "Platform address to receive royalties"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "distribute",
+      "desc": "Distribute received payment according to configured shares",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ],
+  "state": {
+    "global": {
+      "num_byte_slices": 3,
+      "num_uints": 3
+    },
+    "local": {
+      "num_byte_slices": 0,
+      "num_uints": 0
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "artist": {
+        "type": "string",
+        "description": "Artist wallet address"
+      },
+      "producer": {
+        "type": "string",
+        "description": "Producer wallet address"
+      },
+      "platform": {
+        "type": "string",
+        "description": "Platform wallet address"
+      },
+      "artist_share": {
+        "type": "integer",
+        "description": "Artist percentage share (default: 70%)"
+      },
+      "producer_share": {
+        "type": "integer",
+        "description": "Producer percentage share (default: 20%)"
+      },
+      "platform_share": {
+        "type": "integer",
+        "description": "Platform percentage share (default: 10%)"
+      }
+    }
+  }
+}

@@ -224,7 +224,7 @@ export function BondingCurveTrader({ song }: BondingCurveTraderProps) {
                   <div className="flex justify-between">
                     <span className="text-gray-400">Price Impact</span>
                     <span className="text-green-400">
-                      +{((calculateTokensForAlgo(parseFloat(algoAmount)) / virtualTokenReserve) * 100).toFixed(3)}%
+                      +{((parseFloat(algoAmount) / virtualAlgoReserve) * 100).toFixed(2)}%
                     </span>
                   </div>
                 </div>
@@ -232,9 +232,8 @@ export function BondingCurveTrader({ song }: BondingCurveTraderProps) {
               
               <Button
                 onClick={handleTrade}
-                disabled={!algoAmount || parseFloat(algoAmount) <= 0 || isLoading}
-                className="w-full bg-[#15b9b7] hover:bg-[#15b9b7]/90 text-[#001324] font-semibold"
-                size="lg"
+                disabled={!algoAmount || isLoading}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3"
               >
                 {isLoading ? "Processing..." : `Buy ${song.ticker}`}
               </Button>
@@ -275,10 +274,9 @@ export function BondingCurveTrader({ song }: BondingCurveTraderProps) {
                     variant="outline"
                     className="text-xs border-[#15b9b7]/30 hover:border-[#15b9b7] bg-transparent text-white"
                     onClick={() => {
-                      // Simulate user balance
-                      const userBalance = 1000000
-                      const percentage = parseInt(percent) / 100
-                      setTokenAmount((userBalance * percentage).toString())
+                      const balance = 1000000 // Mock balance
+                      const amount = Math.floor(balance * (parseInt(percent) / 100))
+                      setTokenAmount(amount.toString())
                     }}
                   >
                     {percent}
@@ -286,11 +284,25 @@ export function BondingCurveTrader({ song }: BondingCurveTraderProps) {
                 ))}
               </div>
               
+              {tokenAmount && (
+                <div className="space-y-2 text-sm bg-[#15b9b7]/5 p-3 rounded-lg border border-[#15b9b7]/20">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Artist Royalty (1%)</span>
+                    <span className="text-white">{(parseFloat(algoAmount) * 0.01).toFixed(4)} ALGO</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Price Impact</span>
+                    <span className="text-red-400">
+                      -{((parseFloat(tokenAmount) / virtualTokenReserve) * 100).toFixed(2)}%
+                    </span>
+                  </div>
+                </div>
+              )}
+              
               <Button
                 onClick={handleTrade}
-                disabled={!tokenAmount || parseFloat(tokenAmount) <= 0 || isLoading}
-                className="w-full bg-red-500 hover:bg-red-500/90 text-white font-semibold"
-                size="lg"
+                disabled={!tokenAmount || isLoading}
+                className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3"
               >
                 {isLoading ? "Processing..." : `Sell ${song.ticker}`}
               </Button>
@@ -298,7 +310,6 @@ export function BondingCurveTrader({ song }: BondingCurveTraderProps) {
           </Tabs>
         </CardContent>
       </Card>
-      
       {/* Graduation Notice */}
       {graduationProgress >= 100 && (
         <Card className="border-green-500/20 bg-gradient-to-r from-green-500/10 to-[#15b9b7]/10">

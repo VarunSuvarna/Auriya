@@ -1,0 +1,92 @@
+{
+  "name": "DAOGovernance",
+  "desc": "DAO Governance Contract implementing proposal creation and voting with ARC-20 token staking",
+  "methods": [
+    {
+      "name": "initialize",
+      "desc": "Initialize the DAO with governance token",
+      "args": [
+        {
+          "type": "uint64",
+          "name": "token_asset",
+          "desc": "Asset ID of the governance token"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "create_proposal",
+      "desc": "Create a new governance proposal",
+      "args": [
+        {
+          "type": "string",
+          "name": "description",
+          "desc": "Description of the proposal"
+        }
+      ],
+      "returns": {
+        "type": "uint64",
+        "desc": "Proposal ID"
+      }
+    },
+    {
+      "name": "vote",
+      "desc": "Vote on a proposal",
+      "args": [
+        {
+          "type": "uint64",
+          "name": "proposal_id",
+          "desc": "ID of the proposal to vote on"
+        },
+        {
+          "type": "bool",
+          "name": "support",
+          "desc": "True for support, false for opposition"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "get_result",
+      "desc": "Get the result of a proposal",
+      "args": [
+        {
+          "type": "uint64",
+          "name": "proposal_id",
+          "desc": "ID of the proposal"
+        }
+      ],
+      "returns": {
+        "type": "string",
+        "desc": "Proposal result status"
+      }
+    }
+  ],
+  "state": {
+    "global": {
+      "num_byte_slices": 0,
+      "num_uints": 2
+    },
+    "local": {
+      "num_byte_slices": 0,
+      "num_uints": 0
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "proposal_count": {
+        "type": "integer",
+        "description": "Total number of proposals created"
+      },
+      "token_asset_id": {
+        "type": "integer",
+        "description": "Asset ID of the governance token"
+      }
+    }
+  }
+}

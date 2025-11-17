@@ -8,12 +8,14 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex min-h-screen bg-[#001324]">
-      {/* Fixed sidebar on the left */}
-      <DashboardSidebar />
-      
-      {/* Main content area with left margin to accommodate sidebar */}
-      <div className="flex-1 ml-64">
-        <div className="p-6 pt-20 max-w-7xl mx-auto">
+      {/* Fixed sidebar on the left - hidden on mobile */}
+      <div className="hidden md:block">
+        <DashboardSidebar />
+      </div>
+
+      {/* Main content area with responsive margin */}
+      <div className="flex-1 md:ml-64">
+        <div className="p-4 md:p-6 pt-20 max-w-7xl mx-auto w-full">
           {children}
         </div>
       </div>

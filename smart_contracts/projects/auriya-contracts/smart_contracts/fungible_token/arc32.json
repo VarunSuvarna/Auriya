@@ -1,0 +1,63 @@
+{
+  "name": "FungibleToken",
+  "desc": "ARC-20 Token Implementation for royalty distribution with DEX compatibility",
+  "methods": [
+    {
+      "name": "deploy_token",
+      "desc": "Deploy the fungible token asset",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "mint",
+      "desc": "Mint tokens to the sender (creator only)",
+      "args": [
+        {
+          "type": "uint64",
+          "name": "amount",
+          "desc": "Amount of tokens to mint"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ],
+  "state": {
+    "global": {
+      "num_byte_slices": 2,
+      "num_uints": 4
+    },
+    "local": {
+      "num_byte_slices": 0,
+      "num_uints": 0
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Token name"
+      },
+      "symbol": {
+        "type": "string",
+        "description": "Token symbol"
+      },
+      "decimals": {
+        "type": "integer",
+        "description": "Number of decimal places"
+      },
+      "total_supply": {
+        "type": "integer",
+        "description": "Total token supply"
+      },
+      "asset_id": {
+        "type": "integer",
+        "description": "Algorand asset ID"
+      }
+    }
+  }
+}

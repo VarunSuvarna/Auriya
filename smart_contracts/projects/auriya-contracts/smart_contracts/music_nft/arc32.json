@@ -1,0 +1,71 @@
+{
+  "name": "MusicNFT",
+  "desc": "ARC-3 NFT Smart Contract for music assets with IPFS metadata support",
+  "methods": [
+    {
+      "name": "mint",
+      "desc": "Mint a new ARC-3 NFT with metadata URL",
+      "args": [
+        {
+          "type": "string",
+          "name": "metadata_url",
+          "desc": "IPFS URL containing the NFT metadata"
+        },
+        {
+          "type": "address",
+          "name": "receiver",
+          "desc": "Address that will receive the minted NFT"
+        }
+      ],
+      "returns": {
+        "type": "uint64",
+        "desc": "Asset ID of the newly minted NFT"
+      }
+    },
+    {
+      "name": "transfer_ownership",
+      "desc": "Transfer contract ownership to a new address",
+      "args": [
+        {
+          "type": "address",
+          "name": "new_owner",
+          "desc": "New owner address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ],
+  "state": {
+    "global": {
+      "num_byte_slices": 3,
+      "num_uints": 1
+    },
+    "local": {
+      "num_byte_slices": 0,
+      "num_uints": 0
+    }
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Name of the NFT collection"
+      },
+      "symbol": {
+        "type": "string", 
+        "description": "Symbol for the NFT collection"
+      },
+      "base_metadata_url": {
+        "type": "string",
+        "description": "Base URL for metadata"
+      },
+      "total_supply": {
+        "type": "integer",
+        "description": "Total number of NFTs minted"
+      }
+    }
+  }
+}

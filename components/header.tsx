@@ -13,7 +13,7 @@ interface HeaderProps {
 export function Header({ onToggleSidebar }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#15b9b7]/20 bg-[#001324]">
-      <div className="flex h-16 items-center gap-4 px-6">
+      <div className="flex h-16 items-center gap-2 md:gap-4 px-4 md:px-6">
         <Button
           variant="ghost"
           size="icon"
@@ -25,8 +25,8 @@ export function Header({ onToggleSidebar }: HeaderProps) {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#15b9b7]">
-            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg bg-[#15b9b7]">
+            <svg className="h-5 w-5 md:h-6 md:w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -35,11 +35,11 @@ export function Header({ onToggleSidebar }: HeaderProps) {
               />
             </svg>
           </div>
-          <span className="font-space-grotesk text-xl font-bold text-white">AlgoTunes</span>
+          <span className="font-space-grotesk text-lg md:text-xl font-bold text-white">AlgoTunes</span>
         </Link>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-2xl">
+        <div className="flex-1 max-w-2xl hidden md:block">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
@@ -51,16 +51,16 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0 ml-auto">
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 border-[#15b9b7]/30 hover:bg-[#15b9b7]/10 hover:text-[#15b9b7] bg-transparent text-white"
+            className="gap-1 md:gap-2 border-[#15b9b7]/30 hover:bg-[#15b9b7]/10 hover:text-[#15b9b7] bg-transparent text-white px-2 md:px-3"
             asChild
           >
             <Link href="/upload">
               <Upload className="h-4 w-4" />
-              <span className="hidden sm:inline">Upload</span>
+              <span className="hidden md:inline">Upload</span>
             </Link>
           </Button>
 

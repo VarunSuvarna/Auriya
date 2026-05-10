@@ -10,13 +10,7 @@ export async function GET() {
   try {
     const { data: activities, error } = await supabase
       .from('activities')
-      .select(`
-        *,
-        songs (
-          title,
-          artist
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
       .limit(20)
 

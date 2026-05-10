@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
         id: song.id,
         title: song.title,
         artist: song.artist,
-        coverArt: song.cover_art,
+        coverArt: song.cover_art?.startsWith('/') || song.cover_art?.startsWith('http') ? song.cover_art : `/${song.cover_art}`,
         audioUrl: song.audio_url,
         price: currentPrice || song.initial_price || 0.001,
         marketCap: song.market_cap || (currentPrice * 1000000),

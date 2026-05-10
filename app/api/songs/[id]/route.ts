@@ -28,7 +28,7 @@ export async function GET(
     // Map DB fields to frontend expectations
     const transformed = {
       ...song,
-      coverArt: song.cover_art,
+      coverArt: song.cover_art?.startsWith('/') || song.cover_art?.startsWith('http') ? song.cover_art : `/${song.cover_art}`,
       audioUrl: song.audio_url,
       marketCap: song.market_cap || (currentPrice * 1000000), // Default to full supply cap
       price: currentPrice || song.initial_price || 0.001,

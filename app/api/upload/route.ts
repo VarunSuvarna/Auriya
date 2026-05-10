@@ -16,7 +16,7 @@ async function registerStemOnChain(params: {
   royaltyBps: number
   metadataUri: string
 }) {
-  const creatorMnemonic = process.env.ALGORAND_CREATOR_MNEMONIC
+  const creatorMnemonic = process.env.ALGORAND_CREATOR_MNEMONIC?.trim().replace(/^["']|["']$/g, '')
   if (!creatorMnemonic || !STEM_REGISTRY_APP_ID) {
     return { registered: false as const }
   }
@@ -25,7 +25,13 @@ async function registerStemOnChain(params: {
   const algodToken = process.env.ALGOD_TOKEN || ''
   const algodPort = Number(process.env.ALGOD_PORT || 443)
 
-  const creator = algosdk.mnemonicToSecretKey(creatorMnemonic)
+  let creator;
+  try {
+    creator = algosdk.mnemonicToSecretKey(creatorMnemonic)
+  } catch (err) {
+    console.error("Invalid ALGORAND_CREATOR_MNEMONIC provided.");
+    return { registered: false as const }
+  }
   const algod = new algosdk.Algodv2(algodToken, algodServer, algodPort)
   const suggested = await algod.getTransactionParams().do()
 
@@ -76,7 +82,7 @@ async function maybeMintAlgorandAsa(params: {
   supply: number
   mintToken: boolean
 }) {
-  const creatorMnemonic = process.env.ALGORAND_CREATOR_MNEMONIC
+  const creatorMnemonic = process.env.ALGORAND_CREATOR_MNEMONIC?.trim().replace(/^["']|["']$/g, '')
   if (!creatorMnemonic) {
     return { minted: false as const }
   }
@@ -86,7 +92,13 @@ async function maybeMintAlgorandAsa(params: {
   const algodPort = Number(process.env.ALGOD_PORT || 443)
   const network = process.env.NEXT_PUBLIC_NETWORK || 'testnet'
 
-  const creator = algosdk.mnemonicToSecretKey(creatorMnemonic)
+  let creator;
+  try {
+    creator = algosdk.mnemonicToSecretKey(creatorMnemonic)
+  } catch (err) {
+    console.error("Invalid ALGORAND_CREATOR_MNEMONIC provided for ASA.");
+    return { minted: false as const }
+  }
   const algod = new algosdk.Algodv2(algodToken, algodServer, algodPort)
   const suggested = await algod.getTransactionParams().do()
   const metadata = {

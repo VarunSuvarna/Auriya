@@ -2,6 +2,9 @@
   "name": "my-v0-project",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "next build",
     "dev": "next dev",
@@ -9,8 +12,7 @@
     "start": "next start",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
-    "clean": "rm -rf .next node_modules/.cache",
-    "prebuild": "npm run clean"
+    "clean": "rm -rf .next node_modules/.cache"
   },
   "dependencies": {
     "@algorandfoundation/liquid-auth-use-wallet-client": "^1.0.0",

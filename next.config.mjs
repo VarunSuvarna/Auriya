@@ -28,6 +28,7 @@ const nextConfig = {
       ...config.resolve.alias,
       "@algorandfoundation/liquid-auth-use-wallet-client": path.resolve(__dirname, 'lib/mocks/algorand-wallets.js'),
       "@perawallet/connect-beta": path.resolve(__dirname, 'lib/mocks/algorand-wallets.js'),
+      "@blockshake/defly-connect": path.resolve(__dirname, 'lib/mocks/algorand-wallets.js'),
     };
     return config;
   },

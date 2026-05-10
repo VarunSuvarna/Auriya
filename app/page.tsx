@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { SongCard } from "@/components/song-card"
 import { RealtimeActivity } from "@/components/realtime-activity"
 import { RealtimeStats } from "@/components/realtime-stats"
@@ -182,8 +182,30 @@ const mockSongs = [
 ]
 
 export default function Home() {
+  const [songs, setSongs] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
   const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    async function fetchSongs() {
+      try {
+        const response = await fetch('/api/songs')
+        const data = await response.json()
+        if (data && data.length > 0) {
+          setSongs(data)
+        } else {
+          setSongs(mockSongs)
+        }
+      } catch (error) {
+        console.error('Failed to fetch songs:', error)
+        setSongs(mockSongs)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchSongs()
+  }, [])
 
   const toggleLike = (songId: string) => {
     const newLiked = new Set(likedSongs)
@@ -194,6 +216,8 @@ export default function Home() {
     }
     setLikedSongs(newLiked)
   }
+
+  const currentSongs = songs.length > 0 ? songs : mockSongs
 
   return (
     <div className="container mx-auto px-6 py-8">
@@ -209,7 +233,7 @@ export default function Home() {
             <Button 
               className="bg-[#15b9b7] hover:bg-[#15b9b7]/90 text-white gap-2 group/btn"
               onClick={() => {
-                const firstSong = mockSongs[0]
+                const firstSong = currentSongs[0]
                 window.dispatchEvent(new CustomEvent('playSong', { detail: firstSong }))
               }}
             >
@@ -220,7 +244,7 @@ export default function Home() {
               variant="outline" 
               className="border-[#15b9b7]/30 text-[#15b9b7] hover:bg-[#15b9b7]/10 gap-2"
               onClick={() => {
-                const shuffledSongs = [...mockSongs].sort(() => Math.random() - 0.5)
+                const shuffledSongs = [...currentSongs].sort(() => Math.random() - 0.5)
                 const randomSong = shuffledSongs[0]
                 window.dispatchEvent(new CustomEvent('playSong', { detail: randomSong }))
                 window.dispatchEvent(new CustomEvent('enableShuffle'))
@@ -259,18 +283,30 @@ export default function Home() {
         </TabsList>
 
         <TabsContent value="trending" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockSongs.map((song) => (
-              <SongCard key={song.id} song={song} onPlay={(selectedSong) => {
-                window.dispatchEvent(new CustomEvent('playSong', { detail: selectedSong }))
-              }} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 4, 5, 6, 7, 8].map((i) => (
+                <div key={i} className="bg-white/5 rounded-2xl p-4 h-[350px] animate-pulse">
+                  <div className="aspect-square rounded-xl bg-white/10 mb-4" />
+                  <div className="h-6 w-3/4 bg-white/10 rounded mb-2" />
+                  <div className="h-4 w-1/2 bg-white/10 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {currentSongs.map((song) => (
+                <SongCard key={song.id} song={song} onPlay={(selectedSong) => {
+                  window.dispatchEvent(new CustomEvent('playSong', { detail: selectedSong }))
+                }} />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="hot" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockSongs
+            {currentSongs
               .filter((s) => s.change24h > 10)
               .map((song) => (
                 <SongCard key={song.id} song={song} onPlay={(selectedSong) => {
@@ -282,7 +318,7 @@ export default function Home() {
 
         <TabsContent value="new" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockSongs.slice(0, 3).map((song) => (
+            {currentSongs.slice(0, 3).map((song) => (
               <SongCard key={song.id} song={song} onPlay={(selectedSong) => {
                 window.dispatchEvent(new CustomEvent('playSong', { detail: selectedSong }))
               }} />
@@ -301,7 +337,7 @@ export default function Home() {
             </Button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {mockSongs.slice(6, 12).map((song) => (
+            {currentSongs.slice(currentSongs.length > 6 ? 6 : 0, 12).map((song) => (
               <div
                 key={song.id}
                 className="group cursor-pointer p-3 rounded-lg hover:bg-[#15b9b7]/5 transition-all duration-300"

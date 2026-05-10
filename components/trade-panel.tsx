@@ -54,7 +54,7 @@ export function TradePanel({ coin }: TradePanelProps) {
                   placeholder="0.00"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                  <span className="text-sm font-medium text-white">SOL</span>
+                  <span className="text-sm font-medium text-white">ALGO</span>
                   <Button size="icon" variant="ghost" className="h-6 w-6 text-[#15b9b7]">
                     <Repeat className="h-3 w-3" />
                   </Button>
@@ -64,7 +64,7 @@ export function TradePanel({ coin }: TradePanelProps) {
 
             {/* Quick Amount Buttons */}
             <div className="grid grid-cols-4 gap-2">
-              {["Reset", "0.1 SOL", "0.5 SOL", "Max"].map((label) => (
+              {["Reset", "0.1 ALGO", "0.5 ALGO", "Max"].map((label) => (
                 <Button
                   key={label}
                   size="sm"
@@ -72,8 +72,8 @@ export function TradePanel({ coin }: TradePanelProps) {
                   className="text-xs border-[#15b9b7]/30 hover:border-[#15b9b7] bg-transparent text-white hover:bg-[#15b9b7]/10"
                   onClick={() => {
                     if (label === "Reset") setAmount("0.00")
-                    else if (label === "0.1 SOL") setAmount("0.1")
-                    else if (label === "0.5 SOL") setAmount("0.5")
+                    else if (label === "0.1 ALGO") setAmount("0.1")
+                    else if (label === "0.5 ALGO") setAmount("0.5")
                   }}
                 >
                   {label}
@@ -112,7 +112,7 @@ export function TradePanel({ coin }: TradePanelProps) {
           <TabsContent value="sell" className="space-y-4 mt-4">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-white">Switch to SOL</label>
+                <label className="text-sm font-medium text-white">Switch to ALGO</label>
                 <Button size="sm" variant="ghost" className="h-6 text-xs text-[#15b9b7] hover:text-[#15b9b7]/80">
                   Set max slippage
                 </Button>

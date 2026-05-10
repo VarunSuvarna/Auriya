@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { TrendingUp, TrendingDown, Users, Music, Headphones } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useRealtime } from "@/hooks/useRealtime"
@@ -7,9 +8,22 @@ import { cn } from "@/lib/utils"
 
 export function RealtimeStats() {
   const { activeListeners, playCounts } = useRealtime()
+  const [mounted, setMounted] = useState(false)
 
-  const totalPlays = Object.values(playCounts).reduce((sum, count) => sum + count, 0)
-  const avgPlaysPerSong = totalPlays > 0 ? Math.floor(totalPlays / Object.keys(playCounts).length) : 0
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const totalPlays = mounted ? Object.values(playCounts).reduce((sum, count) => sum + count, 0) : 0
+  const avgPlaysPerSong = mounted && totalPlays > 0 ? Math.floor(totalPlays / Object.keys(playCounts).length) : 0
+  
+  if (!mounted) return (
+     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+       {[1,2,3].map(i => (
+         <div key={i} className="h-24 bg-white/5 rounded-xl animate-pulse" />
+       ))}
+     </div>
+  )
 
   const stats = [
     {

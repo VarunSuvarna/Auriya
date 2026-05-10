@@ -131,6 +131,20 @@ export function SongCard({ song, onPlay }: SongCardProps) {
             >
               <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
             </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                const url = `${window.location.origin}/coin/${song.id}`
+                navigator.clipboard.writeText(url)
+                import("react-toastify").then(({ toast }) => toast.success("Link copied!"))
+              }}
+              className="h-8 w-8 p-0 rounded-full backdrop-blur-sm bg-black/20 text-white hover:bg-[#15b9b7]/30 transition-all duration-200"
+            >
+              <Share className="h-4 w-4" />
+            </Button>
           </div>
 
           <div
@@ -179,25 +193,21 @@ export function SongCard({ song, onPlay }: SongCardProps) {
             <p className="text-xs md:text-sm text-gray-400 truncate group-hover:text-gray-300 transition-colors duration-200">{song.artist}</p>
           </Link>
 
-          <div className="mt-2 md:mt-3 flex items-center justify-between text-xs md:text-sm">
+          <div className="mt-2 md:mt-3 flex items-center justify-between text-xs md:text-sm pt-2 border-t border-white/5">
             <div className="group/stat">
-              <p className="text-xs text-gray-400 group-hover/stat:text-gray-300 transition-colors">Market Cap</p>
-              <p className="font-semibold text-white group-hover/stat:text-[#15b9b7] transition-colors">${(song.marketCap / 1000).toFixed(1)}K</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-500">Price</p>
+              <p className="font-bold text-[#15b9b7]">{currentPrice.toFixed(5)} ALGO</p>
             </div>
-            <div className="text-right group/stat">
-              <p className="text-xs text-gray-400 group-hover/stat:text-gray-300 transition-colors">Price</p>
-              <p className={cn(
-                "font-semibold group-hover/stat:text-white transition-colors",
-                currentPrice !== song.price ? "text-[#15b9b7] animate-pulse" : "text-[#15b9b7]"
-              )}>
-                {currentPrice.toFixed(2)} ALGO
-              </p>
-            </div>
+            <Link href={`/coin/${song.id}`}>
+               <Button size="sm" className="bg-[#15b9b7]/10 hover:bg-[#15b9b7] text-[#15b9b7] hover:text-white border border-[#15b9b7]/20 transition-all h-8">
+                 Trade
+               </Button>
+            </Link>
           </div>
 
-          <div className="mt-2 md:mt-3 flex items-center justify-between text-xs text-gray-400">
-            <span className="group-hover:text-gray-300 transition-colors">{song.holders} holders</span>
-            <span className="font-mono bg-[#15b9b7]/10 px-2 py-1 rounded-full text-[#15b9b7] group-hover:bg-[#15b9b7]/20 transition-colors">{song.ticker}</span>
+          <div className="mt-3 flex items-center justify-between text-[10px] text-gray-500 uppercase tracking-tighter">
+            <span>{song.holders} holders</span>
+            <span className="font-mono bg-white/5 px-2 py-0.5 rounded text-gray-400">{song.ticker}</span>
           </div>
         </div>
       </CardContent>

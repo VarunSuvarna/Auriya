@@ -1,29 +1,53 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-
+import { useWallet } from "@txnlab/use-wallet-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Camera, User, Bell, Shield, Check } from "lucide-react"
 
 export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { activeAddress } = useWallet()
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   
   const [profile, setProfile] = useState({
-    displayName: "Music Lover",
-    username: "musiclover123",
-    email: "user@example.com",
-    bio: "Passionate about discovering new music and supporting artists through NFTs",
+    displayName: "",
+    username: "",
+    email: "",
+    bio: "",
     country: "United States",
     profileImage: null as string | null
   })
+
+  useEffect(() => {
+    async function loadProfile() {
+      if (!activeAddress) return
+      try {
+        const res = await fetch(`/api/profile?address=${activeAddress}`)
+        const data = await res.json()
+        if (data.success && data.profile) {
+          setProfile({
+            displayName: data.profile.display_name || "",
+            username: data.profile.username || "",
+            email: data.profile.email || "",
+            bio: data.profile.bio || "",
+            country: data.profile.country || "United States",
+            profileImage: data.profile.avatar_url || null
+          })
+        }
+      } catch (err) {
+        console.error("Failed to load profile", err)
+      }
+    }
+    loadProfile()
+  }, [activeAddress])
 
   const [notifications, setNotifications] = useState({
     newReleases: true,
@@ -50,35 +74,34 @@ export default function ProfilePage() {
   }
 
   const handleSave = async () => {
+    if (!activeAddress) return
     setIsSaving(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wallet_address: activeAddress,
+          display_name: profile.displayName,
+          username: profile.username,
+          email: profile.email,
+          bio: profile.bio,
+          avatar_url: profile.profileImage
+        })
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2000)
+      }
+    } catch (err) {
+      console.error("Save failed", err)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleCancel = () => {
-    // Reset to original values
-    setProfile({
-      displayName: "Music Lover",
-      username: "musiclover123",
-      email: "user@example.com",
-      bio: "Passionate about discovering new music and supporting artists through NFTs",
-      country: "United States",
-      profileImage: null
-    })
-    setNotifications({
-      newReleases: true,
-      priceAlerts: true,
-      socialActivity: false,
-      marketing: false
-    })
-    setPrivacy({
-      publicProfile: true,
-      showListening: true,
-      showPurchases: false
-    })
+    window.location.reload()
   }
 
   return (
@@ -366,8 +389,6 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
-
-
 
         {/* Save Changes */}
         <div className="flex justify-end gap-4">

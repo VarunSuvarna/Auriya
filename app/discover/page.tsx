@@ -1,5 +1,5 @@
 "use client"
-
+import { useState, useEffect } from "react"
 import { SongCard } from "@/components/song-card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -78,6 +78,34 @@ const mockSongs = [
 const genres = ["All", "Electronic", "Hip Hop", "Rock", "Pop", "Jazz", "Classical", "Ambient"]
 
 export default function DiscoverPage() {
+  const [songs, setSongs] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedGenre, setSelectedGenre] = useState("All")
+
+  useEffect(() => {
+    async function fetchSongs() {
+      try {
+        const response = await fetch('/api/songs')
+        const data = await response.json()
+        if (data && data.length > 0) {
+          setSongs(data)
+        } else {
+          setSongs(mockSongs)
+        }
+      } catch (error) {
+        console.error('Failed to fetch songs:', error)
+        setSongs(mockSongs)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchSongs()
+  }, [])
+
+  const filteredSongs = songs.filter(song => 
+    selectedGenre === "All" || song.genre?.toLowerCase() === selectedGenre.toLowerCase()
+  )
+
   return (
     <div className="container mx-auto px-6 py-8">
       {/* Header */}
@@ -103,10 +131,11 @@ export default function DiscoverPage() {
         {genres.map((genre) => (
           <Button
             key={genre}
-            variant={genre === "All" ? "default" : "outline"}
+            onClick={() => setSelectedGenre(genre)}
+            variant={genre === selectedGenre ? "default" : "outline"}
             size="sm"
             className={
-              genre === "All"
+              genre === selectedGenre
                 ? "bg-accent hover:bg-accent/90 text-primary"
                 : "border-border/50 bg-transparent hover:border-accent/50"
             }
@@ -126,7 +155,7 @@ export default function DiscoverPage() {
 
         <TabsContent value="songs">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockSongs.map((song) => (
+            {filteredSongs.map((song) => (
               <SongCard key={song.id} song={song} />
             ))}
           </div>

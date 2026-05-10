@@ -4,7 +4,6 @@ import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Upload, Music, ImageIcon, Check, Loader2, Eye, EyeOff, X, Play, Pause, AlertCircle } from "lucide-react"
 // import { IPFSService } from "@/lib/ipfs"
-import { AlgorandService } from "@/lib/algorand"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,10 +12,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 
+import { useWallet } from "@txnlab/use-wallet-react"
+
 const steps = ["Upload", "Metadata", "Mint Options", "Confirm"]
 
 export default function UploadPage() {
   const router = useRouter()
+  const { activeAddress } = useWallet()
   const [currentStep, setCurrentStep] = useState(0)
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [coverArt, setCoverArt] = useState<File | null>(null)
@@ -60,36 +62,48 @@ export default function UploadPage() {
 
   const handleSubmit = async () => {
     setIsUploading(true)
+    setError(null)
     try {
-      const songData = {
-        title: formData.title,
-        artist: formData.artist,
-        cover_art: coverPreview || '/placeholder.svg',
-        audio_url: audioPreview || '',
-        price: parseFloat(formData.price) || 0,
-        market_cap: Math.floor(Math.random() * 200000) + 50000,
-        change_24h: (Math.random() - 0.5) * 40,
-        holders: Math.floor(Math.random() * 500) + 50,
-        ticker: formData.ticker,
-        duration: '3:45',
-        genre: 'Electronic',
-        description: formData.description
+      if (!audioFile || !coverArt) {
+        throw new Error("Audio and cover art are required")
       }
 
-      const response = await fetch('/api/songs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(songData)
+      const payload = new FormData()
+      payload.append("title", formData.title)
+      payload.append("artist", formData.artist)
+      payload.append("ticker", formData.ticker)
+      payload.append("description", formData.description)
+      payload.append("credits", formData.credits)
+      payload.append("supply", formData.supply || "1000000")
+      payload.append("price", formData.price || "0")
+      payload.append("royalties", formData.royalties || "10")
+      payload.append("mintNFT", String(mintNFT))
+      payload.append("mintToken", String(mintToken))
+      payload.append("audioFile", audioFile)
+      payload.append("coverArt", coverArt)
+      if (activeAddress) {
+        payload.append("userAddress", activeAddress)
+      }
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: payload,
       })
 
+      const result = await response.json()
       if (response.ok) {
-        alert('Song uploaded and minted successfully!')
-        router.push('/')
+        alert(result?.onChain?.assetId
+          ? `Song uploaded and minted on Algorand (ASA ${result.onChain.assetId})!`
+          : "Song uploaded successfully! On-chain minting can be enabled with server signer config.")
+        router.push("/")
       } else {
-        throw new Error('Upload failed')
+        const errorMsg = result?.details || result?.error || "Upload failed"
+        throw new Error(errorMsg)
       }
     } catch (error) {
-      alert('Upload failed. Please try again.')
+      const message = error instanceof Error ? error.message : "Upload failed. Please try again."
+      setError(message)
+      alert(message)
     } finally {
       setIsUploading(false)
     }

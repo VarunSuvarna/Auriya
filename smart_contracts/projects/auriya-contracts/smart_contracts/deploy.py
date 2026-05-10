@@ -3,7 +3,7 @@ from algosdk.v2client.algod import AlgodClient
 from algokit_utils import get_algod_client, get_indexer_client
 
 def deploy_contracts(network: str = "localnet"):
-    """Deploy all Auriya contracts"""
+    """Deploy all Auriya contracts (Algorand-first)."""
     
     algod_client = get_algod_client()
     
@@ -23,6 +23,22 @@ def deploy_contracts(network: str = "localnet"):
     
     # Deploy DAOGovernance
     print("Deploying DAOGovernance...")
+    # Deployment logic here
+
+    # Deploy StemRegistry
+    print("Deploying StemRegistry...")
+    # Deployment logic here
+
+    # Deploy TrackRecipe
+    print("Deploying TrackRecipe...")
+    # Deployment logic here
+
+    # Deploy AccessPass
+    print("Deploying AccessPass...")
+    # Deployment logic here
+
+    # Deploy MarketplaceRouter
+    print("Deploying MarketplaceRouter...")
     # Deployment logic here
     
     print("All contracts deployed successfully!")

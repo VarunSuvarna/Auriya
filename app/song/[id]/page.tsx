@@ -1,6 +1,8 @@
+
 "use client"
 
-import { use } from "react"
+
+import { useState, useEffect, use } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Play, Heart, Share, TrendingUp, TrendingDown, Users } from "lucide-react"
 
@@ -44,10 +46,40 @@ const mockSongs = [
 export default function SongPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { tokenPrices, playCounts, addActivity } = useRealtime()
-  const song = mockSongs.find(s => s.id === id) || mockSongs[0]
+  const [song, setSong] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchSong() {
+      try {
+        const response = await fetch(`/api/songs`)
+        const data = await response.json()
+        const found = data.find((s: any) => s.id === id)
+        if (found) {
+          setSong(found)
+        } else {
+          setSong(mockSongs.find(s => s.id === id) || mockSongs[0])
+        }
+      } catch (error) {
+        console.error('Failed to fetch song:', error)
+        setSong(mockSongs.find(s => s.id === id) || mockSongs[0])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchSong()
+  }, [id])
+
+  if (isLoading) {
+    return <div className="container mx-auto px-6 py-8 text-center text-white">Loading...</div>
+  }
+
+  if (!song) {
+    return <div className="container mx-auto px-6 py-8 text-center text-white">Song not found</div>
+  }
   
-  const currentPrice = tokenPrices[song.id] || song.price
-  const priceChange = ((currentPrice - song.price) / song.price) * 100
+  const currentPrice = tokenPrices[song.id] || song.price || 0
+  const priceChange = song.price ? ((currentPrice - song.price) / song.price) * 100 : 0
   const isPositive = priceChange > 0
   const currentPlayCount = playCounts[song.id] || 0
 
@@ -55,6 +87,7 @@ export default function SongPage({ params }: { params: Promise<{ id: string }> }
     window.dispatchEvent(new CustomEvent('playSong', { detail: song }))
     addActivity({
       type: 'play',
+      song_id: song.id,
       song_title: song.title,
       artist: song.artist,
       user: 'You'
@@ -88,10 +121,10 @@ export default function SongPage({ params }: { params: Promise<{ id: string }> }
               <Play className="h-4 w-4" />
               Play Now
             </Button>
-            <Button variant="outline" className="border-[#15b9b7]/30 text-[#15b9b7] hover:bg-[#15b9b7]/10">
+            <Button variant="outline" className="border-[#15b9b7]/30 text-[#15b9b7] hover:bg-[#15b9b7]/10 bg-transparent">
               <Heart className="h-4 w-4" />
             </Button>
-            <Button variant="outline" className="border-[#15b9b7]/30 text-[#15b9b7] hover:bg-[#15b9b7]/10">
+            <Button variant="outline" className="border-[#15b9b7]/30 text-[#15b9b7] hover:bg-[#15b9b7]/10 bg-transparent">
               <Share className="h-4 w-4" />
             </Button>
           </div>
@@ -154,7 +187,7 @@ export default function SongPage({ params }: { params: Promise<{ id: string }> }
 
           <div className="rounded-2xl border border-[#15b9b7]/20 bg-gradient-to-br from-[#15b9b7]/5 to-transparent p-6">
             <h3 className="text-xl font-bold text-white mb-4">About</h3>
-            <p className="text-gray-300 leading-relaxed">{song.description}</p>
+            <p className="text-gray-300 leading-relaxed">{song.description || "No description provided."}</p>
           </div>
         </div>
       </div>

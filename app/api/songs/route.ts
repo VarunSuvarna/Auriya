@@ -2,43 +2,63 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 )
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const { data: songs, error } = await supabase
+    const { searchParams } = new URL(req.url)
+    const artistAddress = searchParams.get('artistAddress')
+
+    let query = supabase
       .from('songs')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (artistAddress) {
+      query = query.eq('creator_address', artistAddress)
+    }
+
+    const { data: songs, error } = await query
 
     // Transform data for frontend
-    const transformedSongs = songs?.map(song => ({
-      id: song.id.toString(),
-      title: song.title,
-      artist: song.artist,
-      coverArt: song.cover_art,
-      audioUrl: song.audio_url,
-      price: song.current_price || song.initial_price,
-      marketCap: song.market_cap || 0,
-      change24h: song.change_24h || 0,
-      holders: song.holders || 0,
-      ticker: song.ticker,
-      duration: song.duration || "3:45",
-      genre: song.genre || "Electronic",
-      virtualAlgoReserve: song.virtual_algo_reserve,
-      virtualTokenReserve: song.virtual_token_reserve,
-      realAlgoRaised: song.real_algo_raised,
-      graduated: song.graduated || false
-    }))
+    const transformedSongs = songs?.map(song => {
+      const virtualAlgo = Number(song.virtual_algo_reserve || 30)
+      const virtualToken = Number(song.virtual_token_reserve || 1000000)
+      const currentPrice = song.current_price || (virtualAlgo / virtualToken)
+
+      return {
+        id: song.id,
+        title: song.title,
+        artist: song.artist,
+        coverArt: song.cover_art,
+        audioUrl: song.audio_url,
+        price: currentPrice || song.initial_price || 0.001,
+        marketCap: song.market_cap || (currentPrice * 1000000),
+        change24h: song.change_24h || 0,
+        holders: song.holders || 1,
+        ticker: song.ticker,
+        duration: song.duration || "3:30",
+        genre: song.genre || "Electronic",
+        description: song.description,
+        creatorId: song.creator_id,
+        creatorAddress: song.creator_address,
+        onChainAssetId: song.on_chain_asset_id,
+        virtualAlgoReserve: virtualAlgo,
+        virtualTokenReserve: virtualToken,
+        realAlgoRaised: song.real_algo_raised,
+        graduated: song.graduated || false,
+        createdAt: song.created_at
+      }
+    })
 
     return NextResponse.json(transformedSongs || [])
-  } catch (error) {
-    console.error('Error fetching songs:', error)
-    return NextResponse.json({ error: 'Failed to fetch songs' }, { status: 500 })
+  } catch (error: any) {
+    if (!error.message?.includes('fetch failed')) {
+      console.error('Error fetching songs:', error)
+    }
+    return NextResponse.json([])
   }
 }
 
@@ -52,18 +72,20 @@ export async function POST(req: NextRequest) {
         title: songData.title,
         artist: songData.artist,
         ticker: songData.ticker,
-        cover_art: songData.cover_art,
-        audio_url: songData.audio_url,
-        initial_price: songData.price,
-        current_price: songData.price,
-        market_cap: songData.market_cap,
-        change_24h: songData.change_24h,
-        holders: songData.holders,
+        description: songData.description,
+        cover_art: songData.coverArt || songData.cover_art,
+        audio_url: songData.audioUrl || songData.audio_url,
         duration: songData.duration,
         genre: songData.genre,
-        description: songData.description,
-        virtual_algo_reserve: 30, // 30 ALGO initial
-        virtual_token_reserve: 1000000000, // 1B tokens
+        initial_price: songData.price || songData.initial_price,
+        current_price: songData.price || songData.current_price,
+        total_supply: songData.supply || songData.total_supply,
+        royalty_percentage: songData.royalties || songData.royalty_percentage,
+        creator_id: songData.creatorId,
+        creator_address: songData.creatorAddress,
+        on_chain_asset_id: songData.onChainAssetId,
+        virtual_algo_reserve: songData.virtualAlgoReserve || 30,
+        virtual_token_reserve: songData.virtualTokenReserve || 1000000,
         real_algo_raised: 0,
         graduated: false
       })
@@ -77,4 +99,4 @@ export async function POST(req: NextRequest) {
     console.error('Error creating song:', error)
     return NextResponse.json({ error: 'Failed to create song' }, { status: 500 })
   }
-}
+}

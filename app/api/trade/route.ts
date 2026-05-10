@@ -3,78 +3,81 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
 export async function POST(req: NextRequest) {
   try {
-    const { songId, type, algoAmount, tokenAmount, walletAddress } = await req.json()
+    const { action, songId, amount, userAddress } = await req.json()
 
-    const { data: song } = await supabase
+    // 1. Get current song state
+    const { data: song, error: fetchError } = await supabase
       .from('songs')
       .select('*')
       .eq('id', songId)
       .single()
 
-    if (!song) throw new Error('Song not found')
+    if (fetchError || !song) throw new Error('Song not found')
 
-    const algo = parseFloat(algoAmount)
-    const tokens = parseFloat(tokenAmount)
-    const royaltyRate = song.royalty_percentage / 100
+    const virtualAlgo = Number(song.virtual_algo_reserve)
+    const virtualToken = Number(song.virtual_token_reserve)
+    
+    let newAlgoReserve = virtualAlgo
+    let newTokenReserve = virtualToken
+    let pricePaid = 0
 
-    if (type === 'buy') {
-      const netAlgo = algo * (1 - royaltyRate)
-      const newVirtualAlgo = song.virtual_algo_reserve + netAlgo
-      const newVirtualTokens = (song.virtual_algo_reserve * song.virtual_token_reserve) / newVirtualAlgo
-      const tokensReceived = song.virtual_token_reserve - newVirtualTokens
+    if (action === 'buy') {
+      // Simple Bonding Curve: k = x * y
+      // (algo + dAlgo) * (token - dToken) = k
+      // For simplicity, let's assume 'amount' is the number of tokens to buy
+      const tokensToBuy = Number(amount)
+      if (tokensToBuy >= virtualToken) throw new Error('Not enough tokens in reserve')
 
-      await supabase
-        .from('songs')
-        .update({
-          virtual_algo_reserve: newVirtualAlgo,
-          virtual_token_reserve: newVirtualTokens,
-          real_algo_raised: song.real_algo_raised + netAlgo,
-          holders: song.holders + 1,
-        })
-        .eq('id', songId)
-
-      await supabase.from('transactions').insert({
-        song_id: songId,
-        wallet_address: walletAddress,
-        type: 'buy',
-        algo_amount: algo,
-        token_amount: tokensReceived,
-        price: algo / tokensReceived,
-      })
-
-      return NextResponse.json({ success: true, tokensReceived })
+      newAlgoReserve = (virtualAlgo * virtualToken) / (virtualToken - tokensToBuy)
+      pricePaid = newAlgoReserve - virtualAlgo
+      newTokenReserve = virtualToken - tokensToBuy
     } else {
-      const newVirtualTokens = song.virtual_token_reserve + tokens
-      const newVirtualAlgo = (song.virtual_algo_reserve * song.virtual_token_reserve) / newVirtualTokens
-      const algoReceived = (song.virtual_algo_reserve - newVirtualAlgo) * (1 - royaltyRate)
-
-      await supabase
-        .from('songs')
-        .update({
-          virtual_algo_reserve: newVirtualAlgo,
-          virtual_token_reserve: newVirtualTokens,
-          real_algo_raised: song.real_algo_raised - algoReceived,
-        })
-        .eq('id', songId)
-
-      await supabase.from('transactions').insert({
-        song_id: songId,
-        wallet_address: walletAddress,
-        type: 'sell',
-        algo_amount: algoReceived,
-        token_amount: tokens,
-        price: algoReceived / tokens,
-      })
-
-      return NextResponse.json({ success: true, algoReceived })
+      // Sell logic
+      const tokensToSell = Number(amount)
+      newAlgoReserve = (virtualAlgo * virtualToken) / (virtualToken + tokensToSell)
+      pricePaid = virtualAlgo - newAlgoReserve // This is what the user gets back
+      newTokenReserve = virtualToken + tokensToSell
     }
-  } catch (error) {
-    console.error('Trade error:', error)
-    return NextResponse.json({ error: 'Trade failed' }, { status: 500 })
+
+    const newPrice = newAlgoReserve / newTokenReserve
+
+    // 2. Update Database
+    const { error: updateError } = await supabase
+      .from('songs')
+      .update({
+        virtual_algo_reserve: newAlgoReserve,
+        virtual_token_reserve: newTokenReserve,
+        current_price: newPrice,
+        holders: song.holders + (action === 'buy' ? 1 : 0) // Simplified
+      })
+      .eq('id', songId)
+
+    if (updateError) throw updateError
+
+    // 3. Record Activity
+    await supabase.from('activities').insert({
+      type: action === 'buy' ? 'purchase' : 'trade',
+      song_id: songId,
+      user_address: userAddress,
+      amount: Number(amount),
+      price: newPrice,
+      song_title: song.title,
+      artist: song.artist
+    })
+
+    return NextResponse.json({ 
+      success: true, 
+      newPrice,
+      pricePaid
+    })
+
+  } catch (error: any) {
+    console.error('Trade Error:', error)
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }

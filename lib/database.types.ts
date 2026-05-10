@@ -2,31 +2,34 @@ export interface Song {
   id: string
   title: string
   artist: string
-  cover_art: string
+  ticker: string
   audio_url: string
-  price: number
-  market_cap: number
-  change_24h: number
+  cover_art: string
+  total_supply: number
+  initial_price: number
+  royalty_percentage: number
+  virtual_algo_reserve: number
+  virtual_token_reserve: number
+  real_algo_raised: number
   holders: number
-  ticker?: string
-  duration: string
-  genre: string
   description?: string
-  nft_asset_id?: number
-  token_asset_id?: number
-  ipfs_hash?: string
+  genre?: string
+  duration?: string
+  on_chain_asset_id?: number
+  stem_id?: string
+  creator_address: string
   created_at: string
-  updated_at: string
 }
 
 export interface Activity {
   id: string
-  type: 'mint' | 'trade' | 'transfer' | 'stake'
-  song_id: string
-  user_address: string
-  amount?: number
-  price?: number
-  transaction_id: string
+  type: 'mint' | 'trade' | 'play' | 'like' | 'purchase'
+  song_id?: string
+  user_address?: string
+  artist?: string
+  song_title?: string
+  user?: string
+  transaction_id?: string
   created_at: string
 }
 
@@ -34,30 +37,33 @@ export interface User {
   id: string
   wallet_address: string
   username?: string
+  display_name?: string
   avatar_url?: string
   bio?: string
+  website?: string
+  twitter?: string
+  is_artist: boolean
   created_at: string
-  updated_at: string
 }
 
-export interface TokenHolder {
+export interface Stem {
   id: string
-  song_id: string
-  user_address: string
-  amount: number
-  percentage: number
+  title: string
+  creator_address: string
+  audio_url: string
+  type: string
+  file_size: number
+  on_chain_id?: string
+  metadata?: any
   created_at: string
-  updated_at: string
 }
 
-export interface Trade {
+export interface Recipe {
   id: string
-  song_id: string
-  buyer_address: string
-  seller_address: string
-  amount: number
-  price: number
-  total_value: number
-  transaction_id: string
+  title: string
+  creator_address: string
+  description?: string
+  audio_url?: string
+  on_chain_id?: string
   created_at: string
 }

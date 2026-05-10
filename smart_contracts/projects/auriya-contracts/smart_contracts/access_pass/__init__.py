@@ -1,0 +1,2 @@
+from .contract import AccessPass
+

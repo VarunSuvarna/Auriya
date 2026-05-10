@@ -1,56 +1,10 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { SongCard } from "@/components/song-card"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { TrendingUp, DollarSign, Users, Activity } from "lucide-react"
-
-const mockSongs = [
-  {
-    id: "1",
-    title: "Midnight Dreams",
-    artist: "Luna Wave",
-    coverArt: "/abstract-music-album-cover-purple.jpg",
-    price: 2.5,
-    marketCap: 125000,
-    change24h: 15.3,
-    holders: 234,
-    ticker: "MDNT",
-  },
-  {
-    id: "2",
-    title: "Electric Pulse",
-    artist: "Neon Beats",
-    coverArt: "/electronic-music-cover-cyan.jpg",
-    price: 1.8,
-    marketCap: 89000,
-    change24h: -5.2,
-    holders: 189,
-    ticker: "ELEC",
-  },
-  {
-    id: "3",
-    title: "Ocean Waves",
-    artist: "Aqua Sound",
-    coverArt: "/ocean-waves-music-cover.jpg",
-    price: 3.2,
-    marketCap: 156000,
-    change24h: 8.7,
-    holders: 312,
-    ticker: "WAVE",
-  },
-  {
-    id: "4",
-    title: "Desert Storm",
-    artist: "Sahara Vibes",
-    coverArt: "/desert-music-album-orange.jpg",
-    price: 1.5,
-    marketCap: 67000,
-    change24h: 22.1,
-    holders: 145,
-    ticker: "DSRT",
-  },
-]
+import { TrendingUp, DollarSign, Users, Activity, Loader2 } from "lucide-react"
 
 const stats = [
   {
@@ -84,6 +38,38 @@ const stats = [
 ]
 
 export default function MarketplacePage() {
+  const [listings, setListings] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchListings() {
+      try {
+        const response = await fetch('/api/marketplace')
+        const data = await response.json()
+        if (data.success) {
+          setListings(data.listings)
+        }
+      } catch (error) {
+        console.error("Failed to fetch listings:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchListings()
+  }, [])
+
+  const songsFromListings = listings.map(l => ({
+    id: l.songs.id,
+    title: l.songs.title,
+    artist: l.songs.artist,
+    coverArt: l.songs.cover_art,
+    price: l.price_microalgo / 1_000_000,
+    marketCap: l.songs.market_cap || 0,
+    change24h: l.songs.change_24h || 0,
+    holders: l.songs.holders || 0,
+    ticker: l.songs.ticker,
+  }))
+
   return (
     <div className="container mx-auto px-6 py-8">
       {/* Header */}
@@ -111,49 +97,49 @@ export default function MarketplacePage() {
       </div>
 
       {/* Trading Tabs */}
-      <Tabs defaultValue="top-gainers">
+      <Tabs defaultValue="all-listings">
         <TabsList className="bg-secondary/50 mb-6">
+          <TabsTrigger value="all-listings">All Listings</TabsTrigger>
           <TabsTrigger value="top-gainers">Top Gainers</TabsTrigger>
-          <TabsTrigger value="top-losers">Top Losers</TabsTrigger>
-          <TabsTrigger value="most-traded">Most Traded</TabsTrigger>
           <TabsTrigger value="new-listings">New Listings</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="top-gainers">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockSongs
-              .filter((s) => s.change24h > 0)
-              .map((song) => (
-                <SongCard key={song.id} song={song} />
-              ))}
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-accent" />
           </div>
-        </TabsContent>
+        ) : (
+          <>
+            <TabsContent value="all-listings">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {songsFromListings.map((song) => (
+                  <SongCard key={song.id} song={song} />
+                ))}
+                {songsFromListings.length === 0 && (
+                  <p className="text-muted-foreground col-span-full text-center py-12">No active listings found.</p>
+                )}
+              </div>
+            </TabsContent>
 
-        <TabsContent value="top-losers">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockSongs
-              .filter((s) => s.change24h < 0)
-              .map((song) => (
-                <SongCard key={song.id} song={song} />
-              ))}
-          </div>
-        </TabsContent>
+            <TabsContent value="top-gainers">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {songsFromListings
+                  .filter((s) => s.change24h > 0)
+                  .map((song) => (
+                    <SongCard key={song.id} song={song} />
+                  ))}
+              </div>
+            </TabsContent>
 
-        <TabsContent value="most-traded">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockSongs.map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="new-listings">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockSongs.slice(0, 3).map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </TabsContent>
+            <TabsContent value="new-listings">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {songsFromListings.slice(0, 6).map((song) => (
+                  <SongCard key={song.id} song={song} />
+                ))}
+              </div>
+            </TabsContent>
+          </>
+        )}
       </Tabs>
     </div>
   )

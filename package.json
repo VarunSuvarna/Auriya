@@ -15,6 +15,7 @@
     "clean": "rm -rf .next node_modules/.cache"
   },
   "dependencies": {
+    "@agoralabs-sh/avm-web-provider": "^1.7.0",
     "@blockshake/defly-connect": "^1.2.1",
     "@emotion/is-prop-valid": "^1.2.1",
     "@hookform/resolvers": "^3.10.0",

@@ -1,17 +1,5 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "functions": {
-    "app/**/*.ts": {
-      "runtime": "nodejs20.x",
-      "maxDuration": 30
-    },
-    "app/**/*.tsx": {
-      "runtime": "nodejs20.x",
-      "maxDuration": 30
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
@@ -29,12 +17,6 @@
           "value": "Content-Type, Authorization"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
     }
   ]
 }
